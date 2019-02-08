@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/enterkey"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:hint="@string/enter_master_key"
+        android:textAlignment="center"
+        android:inputType="textNoSuggestions|textPassword"
+        android:importantForAutofill="no"
+        android:importantForAccessibility="no"
+        tools:ignore="UnusedAttribute" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/loginbutton"
+        android:onClick="loginButton"
+        android:theme="@style/AppTheme"
+        android:text="@string/login_text"
+        />
+
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/ad_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        ads:adSize="SMART_BANNER"
+        ads:adUnitId="@string/banner_ad_unit_id" />
+
+
+</LinearLayout>

@@ -1,0 +1,7 @@
+<accessibility-service
+    android:accessibilityEventTypes="typeViewFocused|typeWindowContentChanged|typeWindowStateChanged"
+    android:notificationTimeout="0"
+    android:canRetrieveWindowContent="true"
+    android:canRequestTouchExplorationMode="true"
+    android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews"
+    xmlns:android="http://schemas.android.com/apk/res/android" />

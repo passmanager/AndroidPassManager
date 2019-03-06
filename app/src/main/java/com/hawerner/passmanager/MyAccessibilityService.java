@@ -2,7 +2,6 @@ package com.hawerner.passmanager;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
@@ -12,11 +11,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
-import android.os.AsyncTask;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.text.Layout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -24,15 +19,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityWindowInfo;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ListView;
-import android.widget.Toast;
 
-import com.google.android.gms.common.FirstPartyScopes;
-
-import java.util.List;
 import java.util.Stack;
 
 public class MyAccessibilityService extends AccessibilityService {
@@ -199,6 +188,13 @@ public class MyAccessibilityService extends AccessibilityService {
             @Override
             public void onClick(View view) {
                 popuni();
+            }
+        });
+        ((Button)mLayout.findViewById(R.id.popuniDugme)).setOnLongClickListener(new View.OnLongClickListener(){
+            @Override
+            public boolean onLongClick(View view) {
+                hideFloating();
+                return true;
             }
         });
     }

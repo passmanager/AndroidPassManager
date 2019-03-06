@@ -2,9 +2,6 @@
     <string name="app_name">Passwords</string>
     <string name="plus_sign">+</string>
     <string name="title_activity_login">MasterKey</string>
-    <string name="banner_ad_unit_id">ca-app-pub-1294169992682019/4131488371</string>
-    <string name="app_ad_unit_id">ca-app-pub-1294169992682019~5751815519</string>
-    <string name="interestial_ad_unit_id">ca-app-pub-1294169992682019/5963444797</string>
     <string name="title_activity_get_username_and_password">Choose account</string>
     <string name="title_activity_preview">PreviewActivity</string>
     <string name="author">Predrag Ožegović</string>

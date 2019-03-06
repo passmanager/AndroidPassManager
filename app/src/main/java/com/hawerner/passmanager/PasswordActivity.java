@@ -2,24 +2,13 @@ package com.hawerner.passmanager;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
-import android.util.Base64;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.EditText;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 import com.r0adkll.slidr.Slidr;
 
 import java.io.BufferedReader;
@@ -31,11 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.lang.System.loadLibrary;
 
 
 public class PasswordActivity extends AppCompatActivity {
@@ -48,21 +34,6 @@ public class PasswordActivity extends AppCompatActivity {
 
 
         Slidr.attach(this);
-
-
-        MobileAds.initialize(this, getString(R.string.app_ad_unit_id));
-
-        // Gets the ad view defined in layout/ad_fragment.xml with ad unit ID set in
-        // values/strings.xml.
-        AdView adView = findViewById(R.id.ad_view_password);
-
-        // Create an ad request. Check your logcat output for the hashed device ID to
-        // get test ads on a physical device. e.g.
-        // "Use AdRequest.Builder.addTestDevice("ABCDEF012345") to get test ads on this device."
-        AdRequest adRequest = new AdRequest.Builder().build();
-
-        // Start loading the ad in the background.
-        adView.loadAd(adRequest);
 
         final Intent intent = getIntent();
         setTitle(intent.getStringExtra("file"));

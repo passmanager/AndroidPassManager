@@ -1,30 +1,18 @@
 package com.hawerner.passmanager;
 
 import android.Manifest;
-import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.fingerprint.FingerprintManager;
-import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyInfo;
-import android.security.keystore.KeyPermanentlyInvalidatedException;
-import android.security.keystore.KeyProperties;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -32,46 +20,24 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.mtramin.rxfingerprint.EncryptionMethod;
+import com.mtramin.rxfingerprint.RxFingerprint;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.sql.Array;
-import java.text.CollationElementIterator;
+import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
-import com.google.android.gms.ads.MobileAds;
-import com.mtramin.rxfingerprint.EncryptionMethod;
-import com.mtramin.rxfingerprint.RxFingerprint;
-import com.r0adkll.slidr.Slidr;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-
 import io.reactivex.disposables.Disposable;
-
-import static com.hawerner.passmanager.AddAccount.writeToFile;
 
 public class ListActivity extends AppCompatActivity {
     private String key = "";
@@ -79,8 +45,6 @@ public class ListActivity extends AppCompatActivity {
     boolean useAsMasterKey = false;
     boolean needToReEncrypt = false;
     private String keyHash, salt;
-    InterstitialAd mInterstitialAd;
-    boolean showAd;
     private EditText keyInput;
     String keyName = "key";
     private Disposable disposable;
@@ -100,21 +64,7 @@ public class ListActivity extends AppCompatActivity {
     protected void onCreate1() {
         key = "";
 
-
-        // Initialize the Mobile Ads SDK.
-        MobileAds.initialize(this, getString(R.string.app_ad_unit_id));
-
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId(getString(R.string.interestial_ad_unit_id));
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
-
-        Random generator = new Random();
-        if (generator.nextInt(3) == 0) {
-            showAd = true;
-        } else {
-            showAd = false;
-        }
-
+        Random generator = new SecureRandom();
 
         if (RxFingerprint.isAvailable(ListActivity.this) && Fajl.fileExists("keyCrypted", getApplicationContext())){
             disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted", getApplicationContext()))
@@ -293,9 +243,6 @@ public class ListActivity extends AppCompatActivity {
         }
 
         if (shouldContinue) {
-            if ((true || showAd) && mInterstitialAd.isLoaded()) {
-                mInterstitialAd.show();
-            }
             setContentView(R.layout.activity_main);
             this.onResume();
         }
@@ -407,23 +354,6 @@ public class ListActivity extends AppCompatActivity {
                     return true;
                 }
             });
-            // Gets the ad view defined in layout/ad_fragment.xml with ad unit ID set in
-            // values/strings.xml.
-            try {
-                AdView adView = findViewById(R.id.ad_view);
-
-                // Create an ad request. Check your logcat output for the hashed device ID to
-                // get test ads on a physical device. e.g.
-                // "Use AdRequest.Builder.addTestDevice("ABCDEF012345") to get test ads on this device."
-                //vuk tel 41CD0028630068A88813F641CAACD6C1
-                AdRequest adRequest = new AdRequest.Builder()
-                        .addTestDevice("41CD0028630068A88813F641CAACD6C1")
-                        .build();
-
-                // Start loading the ad in the background.
-                adView.loadAd(adRequest);
-            } catch (Exception e) {
-            }
         }
         else if (disposable != null && disposable.isDisposed()) {
             disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted", getApplicationContext()))

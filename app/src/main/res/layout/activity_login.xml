@@ -28,7 +28,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/loginbutton"
             android:onClick="loginButton"
-            android:theme="@style/AppTheme"
             android:text="@string/login_text"
             />
 

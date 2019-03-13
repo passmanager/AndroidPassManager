@@ -23,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.mtramin.rxfingerprint.EncryptionMethod;
@@ -56,6 +57,12 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")) {
+            setTheme(R.style.AppThemeDark);
+        }
+        else {
+            setTheme(R.style.AppTheme);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         if (ContextCompat.checkSelfPermission(ListActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -68,6 +75,15 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
     protected void onCreate1() {
         key = "";
+
+        try{
+            key = getIntent().getStringExtra("key");
+            if (key == null){
+                key = "";
+            }
+        }catch (Exception ignored){
+            key = "";
+        }
 
         Random generator = new SecureRandom();
 
@@ -430,7 +446,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         return true;
     }
 
@@ -455,22 +470,47 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void toggleDarkMode(View view) {
+        Switch switchCompat = (Switch) view;
+        /*if (switchCompat.isChecked()){
+            enableDarkMode();
+        }
+        else{
+            disableDarkMode();
+        }*/
+        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+            disableDarkMode();
+        }
+        else{
+            enableDarkMode();
+        }
+    }
+
+    private void disableDarkMode() {
+        Fajl.writeToFile("darkMode", "false", getApplicationContext());
+        setTheme(R.style.AppTheme);
+        this.reload();
+    }
+
+    private void enableDarkMode() {
+        Fajl.writeToFile("darkMode", "true", getApplicationContext());
+        setTheme(R.style.AppThemeDark);
+        this.reload();
+    }
+
+    private void reload() {
+        //setVisibility(View.GONE);
+        //mScrollView.setVisibility(View.VISIBLE);
+        Intent intent = getIntent();
+        intent.putExtra("key", key);
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
     }
 }

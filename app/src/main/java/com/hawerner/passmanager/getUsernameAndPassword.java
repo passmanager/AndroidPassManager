@@ -1,19 +1,13 @@
 package com.hawerner.passmanager;
 
 import android.app.Activity;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -312,7 +306,7 @@ public class getUsernameAndPassword extends AppCompatActivity {
             }
         }
         if (shouldContinue) {
-            setContentView(R.layout.activity_main);
+            setContentView(R.layout.activity_password_list);
             setTitle(dir.getAbsolutePath());
             Collections.sort(files, String.CASE_INSENSITIVE_ORDER);
             final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, files);

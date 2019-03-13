@@ -292,8 +292,12 @@ public class MyAccessibilityService extends AccessibilityService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("Accessibility", "onStartCommand");
-        username = intent.getStringExtra("username");
-        password = intent.getStringExtra("password");
+        try {
+            username = intent.getStringExtra("username");
+            password = intent.getStringExtra("password");
+        }catch (Exception e) {
+            return super.onStartCommand(intent, flags, startId);
+        }
 
         SystemClock.sleep(1000);
         try {

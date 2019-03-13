@@ -17,7 +17,8 @@ public class Fajl {
             outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE);
             outputStream.write(data.getBytes());
             outputStream.close();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             Log.i("T", e.toString());
             e.printStackTrace();
         }

@@ -21,8 +21,10 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -80,6 +82,12 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             key = getIntent().getStringExtra("key");
             if (key == null){
                 key = "";
+            }
+            else{
+                setContentView(R.layout.activity_password_list);
+                setDarkModeSwitch();
+                this.onResume();
+                return;
             }
         }catch (Exception ignored){
             key = "";
@@ -273,6 +281,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
             fab.bringToFront();*/
+            setDarkModeSwitch();
             this.onResume();
         }
     }
@@ -333,6 +342,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             Collections.sort(files, String.CASE_INSENSITIVE_ORDER);
             final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, files);
             final ListView list = findViewById(R.id.filesListView);
+            assert list != null;
             list.setAdapter(adapter);
             list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -450,7 +460,41 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
+        //((Switch) findViewById(R.id.darkModeSwitch)).setChecked(isChecked);
+        /*((Switch) findViewById(R.id.darkModeSwitch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                toggleDarkMode(compoundButton);
+            }
+        });*/
+
         return true;
+    }
+
+    public void setDarkModeSwitch(){
+        boolean isChecked = Fajl.readFromFile("darkMode", getApplicationContext()).equals("true");
+        try {
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            RelativeLayout red = (RelativeLayout) navigationView.getMenu().getItem(0).getActionView();
+            ((Switch) red.findViewById(R.id.darkModeSwitch)).setChecked(isChecked);
+            ((Switch) red.findViewById(R.id.darkModeSwitch)).setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if (b){
+                        enableDarkMode();
+                    }
+                    else{
+                        disableDarkMode();
+                    }
+                }
+            });
+        }
+        catch (Exception e){
+            Log.v("NavigationDrawer", e.getClass().toString());
+            Log.v("NavigationDrawer", e.getCause().toString());
+        }
+
     }
 
     @Override

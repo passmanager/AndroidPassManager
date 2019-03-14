@@ -9,6 +9,5 @@
         android:layout_height="wrap_content"
         android:id="@+id/darkModeSwitch"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:onClick="toggleDarkMode"/>
+        android:layout_centerVertical="true"/>
 </RelativeLayout>

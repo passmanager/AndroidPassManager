@@ -1,6 +1,5 @@
 package com.hawerner.passmanager;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
@@ -21,12 +20,9 @@ public class Sync extends AsyncTask<String, Void, String> {
     private String link;
     private String user;
 
-    private Context context;
-
-    public Sync(String link, String user, Context context) {
+    public Sync(String link, String user) {
         this.link = link;
         this.user = user;
-        this.context = context;
     }
 
     private void getPassword(String entryName){

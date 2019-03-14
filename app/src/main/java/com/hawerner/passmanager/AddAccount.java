@@ -20,6 +20,12 @@ public class AddAccount extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+            setTheme(R.style.AppThemeDark);
+        }
+        else{
+            setTheme(R.style.AppTheme);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_account);
 
@@ -64,7 +70,7 @@ public class AddAccount extends AppCompatActivity {
         //kraj logike
         //writeToFile(fileName.getText().toString(), data);
         Log.i("Sifra", data);
-        writeToFile(Environment.getExternalStorageDirectory().getPath() + "/Passwords/" + fileName.getText().toString(), data);
+        writeToFile(Environment.getExternalStorageDirectory().getPath() + "/Passwords/" + fileName.getText().toString().replace('/', '⁄'), data);
         if (getIntent().getBooleanExtra("isAccessibility", false)){
             Intent output = new Intent();
             output.putExtra("username", username.getText().toString());
@@ -134,12 +140,16 @@ public class AddAccount extends AppCompatActivity {
         BufferedWriter writer = null;
         try
         {
-            writer = new BufferedWriter(new FileWriter( name));
+            writer = new BufferedWriter(new FileWriter(name));
             writer.write(data);
 
         }
         catch ( IOException e)
         {
+            Log.e("writeToFile", "Writing to file failed " + name);
+        }
+        catch (Exception e){
+            Log.e("writeToFile", "Writing to file failed " + name);
         }
         finally
         {

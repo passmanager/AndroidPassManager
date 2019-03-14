@@ -111,7 +111,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     accessibilityEvent.getClassName().toString()
             );
             try {
-                if (accessibilityEvent.getSource().getPackageName().toString().equals("com.hawerner.passmanager")) {
+                if (accessibilityEvent.getSource().getPackageName().toString().equals(getApplicationContext().getPackageName())) {
                     return;
                 }
                 Log.i("Accessibility", accessibilityEvent.getSource().getPackageName().toString());
@@ -136,7 +136,12 @@ public class MyAccessibilityService extends AccessibilityService {
         }
     }
 
-    private void checkFloatingIfNeeded(AccessibilityNodeInfo node) throws Exception {checkFloatingIfNeeded(node, 0);}
+    private void checkFloatingIfNeeded(AccessibilityNodeInfo node) throws Exception {
+        if (currentPackageName.equals(getApplicationContext().getPackageName())) {
+            return;
+        }
+        checkFloatingIfNeeded(node, 0);
+    }
     private void checkFloatingIfNeeded(AccessibilityNodeInfo node, int deep) throws Exception {
         if (node == null) {
             Log.v("Accessibility", "node is null (stopping iteration)");
@@ -172,6 +177,12 @@ public class MyAccessibilityService extends AccessibilityService {
 
     private void showFloating() {
         Log.v("Accessibility", "showFloating()");
+        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+            setTheme(R.style.AppThemeDark);
+        }
+        else {
+            setTheme(R.style.AppTheme);
+        }
         WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
         mLayout = new FrameLayout(this);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -292,8 +303,12 @@ public class MyAccessibilityService extends AccessibilityService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("Accessibility", "onStartCommand");
-        username = intent.getStringExtra("username");
-        password = intent.getStringExtra("password");
+        try {
+            username = intent.getStringExtra("username");
+            password = intent.getStringExtra("password");
+        }catch (Exception e) {
+            return super.onStartCommand(intent, flags, startId);
+        }
 
         SystemClock.sleep(1000);
         try {

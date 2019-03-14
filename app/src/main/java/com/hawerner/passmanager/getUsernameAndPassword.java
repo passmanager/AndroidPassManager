@@ -1,26 +1,24 @@
 package com.hawerner.passmanager;
 
 import android.app.Activity;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.design.widget.NavigationView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.mtramin.rxfingerprint.EncryptionMethod;
@@ -48,7 +46,7 @@ import static com.hawerner.passmanager.ListActivity.getHash;
 
 public class getUsernameAndPassword extends AppCompatActivity {
 
-    private String key;
+    private String key = "";
     boolean shouldContinue = false;
     String keyHash, salt;
     boolean showAd;
@@ -57,7 +55,29 @@ public class getUsernameAndPassword extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+            setTheme(R.style.AppThemeDark);
+        }
+        else {
+            setTheme(R.style.AppTheme);
+        }
         super.onCreate(savedInstanceState);
+
+        try{
+            key = getIntent().getStringExtra("key");
+            if (key == null){
+                key = "";
+            }
+            else{
+                shouldContinue = true;
+                setContentView(R.layout.activity_password_list);
+                setDarkModeSwitch();
+                this.loadList();
+                return;
+            }
+        }catch (Exception ignored){
+            key = "";
+        }
         setContentView(R.layout.activity_login);
 
         keyInput = findViewById(R.id.enterkey);
@@ -312,8 +332,9 @@ public class getUsernameAndPassword extends AppCompatActivity {
             }
         }
         if (shouldContinue) {
-            setContentView(R.layout.activity_main);
-            setTitle(dir.getAbsolutePath());
+            setContentView(R.layout.activity_password_list);
+            setDarkModeSwitch();
+            //this.onResume();
             Collections.sort(files, String.CASE_INSENSITIVE_ORDER);
             final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, files);
             final ListView list = findViewById(R.id.filesListView);
@@ -410,6 +431,57 @@ public class getUsernameAndPassword extends AppCompatActivity {
             Log.i("Accessibility", "Logging something else");
         }
     }
+
+    public void setDarkModeSwitch(){
+        boolean isChecked = Fajl.readFromFile("darkMode", getApplicationContext()).equals("true");
+        try {
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            RelativeLayout red = (RelativeLayout) navigationView.getMenu().getItem(0).getActionView();
+            ((Switch) red.findViewById(R.id.darkModeSwitch)).setChecked(isChecked);
+            ((Switch) red.findViewById(R.id.darkModeSwitch)).setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if (b){
+                        enableDarkMode();
+                    }
+                    else{
+                        disableDarkMode();
+                    }
+                }
+            });
+        }
+        catch (Exception e){
+            Log.v("NavigationDrawer", e.getClass().toString());
+            Log.v("NavigationDrawer", e.getCause().toString());
+        }
+
+    }
+
+    private void disableDarkMode() {
+        Fajl.writeToFile("darkMode", "false", getApplicationContext());
+        setTheme(R.style.AppTheme);
+        this.reload();
+    }
+
+    private void enableDarkMode() {
+        Fajl.writeToFile("darkMode", "true", getApplicationContext());
+        setTheme(R.style.AppThemeDark);
+        this.reload();
+    }
+
+    private void reload() {
+        //setVisibility(View.GONE);
+        //mScrollView.setVisibility(View.VISIBLE);
+        Intent intent = getIntent();
+        intent.putExtra("key", key);
+        intent.putExtra("URI", getIntent().getStringExtra("URI"));
+        intent.putExtra("isAccessibility", getIntent().getBooleanExtra("isAccessibility", false));
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+    }
+
 }
 
 

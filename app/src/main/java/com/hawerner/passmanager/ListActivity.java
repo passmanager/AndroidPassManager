@@ -7,17 +7,25 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.mtramin.rxfingerprint.EncryptionMethod;
@@ -39,7 +47,7 @@ import java.util.Random;
 
 import io.reactivex.disposables.Disposable;
 
-public class ListActivity extends AppCompatActivity {
+public class ListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private String key = "";
     boolean shouldContinue = false;
     boolean useAsMasterKey = false;
@@ -51,6 +59,12 @@ public class ListActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")) {
+            setTheme(R.style.AppThemeDark);
+        }
+        else {
+            setTheme(R.style.AppTheme);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         //Sync sync = new Sync("http://192.168.113.15:8000", "hawerner", getApplicationContext());
@@ -65,6 +79,21 @@ public class ListActivity extends AppCompatActivity {
 
     protected void onCreate1() {
         key = "";
+
+        try{
+            key = getIntent().getStringExtra("key");
+            if (key == null){
+                key = "";
+            }
+            else{
+                setContentView(R.layout.activity_password_list);
+                setDarkModeSwitch();
+                this.onResume();
+                return;
+            }
+        }catch (Exception ignored){
+            key = "";
+        }
 
         Random generator = new SecureRandom();
 
@@ -245,7 +274,16 @@ public class ListActivity extends AppCompatActivity {
         }
 
         if (shouldContinue) {
-            setContentView(R.layout.activity_main);
+            setContentView(R.layout.activity_password_list);
+            /*FloatingActionButton fab = findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    AddAccount(view);
+                }
+            });
+            fab.bringToFront();*/
+            setDarkModeSwitch();
             this.onResume();
         }
     }
@@ -292,8 +330,12 @@ public class ListActivity extends AppCompatActivity {
                 dir.mkdir();
             }
 
-            setContentView(R.layout.activity_main);
-            setTitle(R.string.app_name);
+            if(Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+                setTheme(R.style.AppThemeDark);
+            }
+            else {
+                setTheme(R.style.AppTheme);
+            }
 
             final List<String> files = new ArrayList<>();
             for (File file : dir.listFiles()) {
@@ -302,6 +344,7 @@ public class ListActivity extends AppCompatActivity {
             Collections.sort(files, String.CASE_INSENSITIVE_ORDER);
             final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, files);
             final ListView list = findViewById(R.id.filesListView);
+            assert list != null;
             list.setAdapter(adapter);
             list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -403,5 +446,121 @@ public class ListActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("T", e.toString());
         }
+    }
+
+
+    //copy paste from other class
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        //((Switch) findViewById(R.id.darkModeSwitch)).setChecked(isChecked);
+        /*((Switch) findViewById(R.id.darkModeSwitch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                toggleDarkMode(compoundButton);
+            }
+        });*/
+
+        return true;
+    }
+
+    public void setDarkModeSwitch(){
+        boolean isChecked = Fajl.readFromFile("darkMode", getApplicationContext()).equals("true");
+        try {
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            RelativeLayout red = (RelativeLayout) navigationView.getMenu().getItem(0).getActionView();
+            ((Switch) red.findViewById(R.id.darkModeSwitch)).setChecked(isChecked);
+            ((Switch) red.findViewById(R.id.darkModeSwitch)).setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if (b){
+                        enableDarkMode();
+                    }
+                    else{
+                        disableDarkMode();
+                    }
+                }
+            });
+        }
+        catch (Exception e){
+            Log.v("NavigationDrawer", e.getClass().toString());
+            Log.v("NavigationDrawer", e.getCause().toString());
+        }
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    public void toggleDarkMode(View view) {
+        Switch switchCompat = (Switch) view;
+        /*if (switchCompat.isChecked()){
+            enableDarkMode();
+        }
+        else{
+            disableDarkMode();
+        }*/
+        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+            disableDarkMode();
+        }
+        else{
+            enableDarkMode();
+        }
+    }
+
+    private void disableDarkMode() {
+        Fajl.writeToFile("darkMode", "false", getApplicationContext());
+        setTheme(R.style.AppTheme);
+        this.reload();
+    }
+
+    private void enableDarkMode() {
+        Fajl.writeToFile("darkMode", "true", getApplicationContext());
+        setTheme(R.style.AppThemeDark);
+        this.reload();
+    }
+
+    private void reload() {
+        //setVisibility(View.GONE);
+        //mScrollView.setVisibility(View.VISIBLE);
+        Intent intent = getIntent();
+        intent.putExtra("key", key);
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
     }
 }

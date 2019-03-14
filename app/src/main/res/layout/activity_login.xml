@@ -30,7 +30,5 @@
             android:onClick="loginButton"
             android:text="@string/login_text"
             />
-
-
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

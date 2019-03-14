@@ -27,16 +27,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".PasswordActivity"
-            android:theme="@style/Theme.Slidr.Slidable" />
+            android:name=".PasswordActivity" />
         <activity
             android:name=".AddAccount"
             android:exported="true" />
         <activity
             android:name=".getUsernameAndPassword"
             android:exported="true"
-            android:label="@string/title_activity_get_username_and_password"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:label="@string/title_activity_get_username_and_password" />
 
         <service
             android:name=".MyAccessibilityService"

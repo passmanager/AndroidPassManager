@@ -319,8 +319,12 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 dir.mkdir();
             }
 
-            setContentView(R.layout.activity_password_list);
-            setTitle(R.string.app_name);
+            if(Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+                setTheme(R.style.AppThemeDark);
+            }
+            else {
+                setTheme(R.style.AppTheme);
+            }
 
             final List<String> files = new ArrayList<>();
             for (File file : dir.listFiles()) {

@@ -177,6 +177,12 @@ public class MyAccessibilityService extends AccessibilityService {
 
     private void showFloating() {
         Log.v("Accessibility", "showFloating()");
+        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+            setTheme(R.style.AppThemeDark);
+        }
+        else {
+            setTheme(R.style.AppTheme);
+        }
         WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
         mLayout = new FrameLayout(this);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();

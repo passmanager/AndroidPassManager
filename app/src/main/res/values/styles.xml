@@ -28,7 +28,7 @@
         <item name="android:windowBackground">@android:color/transparent</item>
 
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@color/darkColorPrimaryDark</item>
     </style>
 
     <style name="Theme.Slidr.Slidable" parent="Theme.AppCompat.Light.DarkActionBar">

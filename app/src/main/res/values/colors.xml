@@ -5,6 +5,6 @@
     <color name="colorAccent">#000000</color>
 
     <color name="darkColorPrimary">#000000</color>
-    <color name="darkColorPrimaryDark">#0F0F0F</color>
+    <color name="darkColorPrimaryDark">#1F1F1F</color>
     <color name="darkColorAccent">#FFFFFF</color>
 </resources>

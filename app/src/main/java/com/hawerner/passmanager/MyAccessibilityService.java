@@ -111,7 +111,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     accessibilityEvent.getClassName().toString()
             );
             try {
-                if (accessibilityEvent.getSource().getPackageName().toString().equals("com.hawerner.passmanager")) {
+                if (accessibilityEvent.getSource().getPackageName().toString().equals(getApplicationContext().getPackageName())) {
                     return;
                 }
                 Log.i("Accessibility", accessibilityEvent.getSource().getPackageName().toString());
@@ -136,7 +136,12 @@ public class MyAccessibilityService extends AccessibilityService {
         }
     }
 
-    private void checkFloatingIfNeeded(AccessibilityNodeInfo node) throws Exception {checkFloatingIfNeeded(node, 0);}
+    private void checkFloatingIfNeeded(AccessibilityNodeInfo node) throws Exception {
+        if (currentPackageName.equals(getApplicationContext().getPackageName())) {
+            return;
+        }
+        checkFloatingIfNeeded(node, 0);
+    }
     private void checkFloatingIfNeeded(AccessibilityNodeInfo node, int deep) throws Exception {
         if (node == null) {
             Log.v("Accessibility", "node is null (stopping iteration)");

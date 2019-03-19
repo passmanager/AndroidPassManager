@@ -22,7 +22,8 @@
             android:inputType="textNoSuggestions|textPassword"
             android:importantForAutofill="no"
             android:importantForAccessibility="no"
-            tools:ignore="UnusedAttribute" />
+            tools:ignore="UnusedAttribute"
+            android:textColor="?attr/colorAccent"/>
 
         <Button
             android:layout_width="match_parent"
@@ -30,6 +31,7 @@
             android:id="@+id/loginbutton"
             android:onClick="loginButton"
             android:text="@string/login_text"
+            android:textColor="?attr/colorAccent"
             />
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

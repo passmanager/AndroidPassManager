@@ -17,6 +17,7 @@
         android:textSize="20sp"
         android:importantForAutofill="no"
         tools:ignore="UnusedAttribute"
+        android:textColor="?attr/colorAccent"
         android:inputType="text" />
 
     <EditText
@@ -28,6 +29,7 @@
         android:textSize="20sp"
         android:importantForAutofill="no"
         tools:ignore="UnusedAttribute"
+        android:textColor="?attr/colorAccent"
         android:inputType="text" />
 
     <EditText
@@ -39,6 +41,7 @@
         android:singleLine="true"
         android:textSize="20sp"
         android:importantForAutofill="no"
+        android:textColor="?attr/colorAccent"
         tools:ignore="UnusedAttribute" />
 
     <LinearLayout
@@ -58,6 +61,7 @@
             android:background="@drawable/border"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
+            android:textColor="?attr/colorAccent"
             tools:ignore="ButtonStyle" />
         <Button
             android:layout_marginTop="20dp"
@@ -70,6 +74,7 @@
             android:id="@+id/doneButton"
             android:background="@drawable/border"
             android:onClick="AddAcc"
+            android:textColor="?attr/colorAccent"
             tools:ignore="ButtonStyle" />
     </LinearLayout>
 

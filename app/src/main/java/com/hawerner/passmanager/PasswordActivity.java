@@ -64,8 +64,10 @@ public class PasswordActivity extends AppCompatActivity {
             }
             String usernameSalt = lines.get(0);
             String username = decrypt(lines.get(1), key, usernameSalt);
+            username = username.replace("\u200b", " ");
             String passwordSalt = lines.get(2);
             String password = decrypt(lines.get(3), key, passwordSalt);
+            password = password.replace("\u200b", " ");
 
             TextView userTextView = findViewById(R.id.usernameTextView);
             TextView pwdTextView = findViewById(R.id.passwordTextView);

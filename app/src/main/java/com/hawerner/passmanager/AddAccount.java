@@ -61,15 +61,23 @@ public class AddAccount extends AppCompatActivity {
             return;
         }
 
+        if (username.getText().toString().contains("'") || password.getText().toString().contains("'")){
+            Snackbar.make(findViewById(R.id.addAccountActivity), "Please don't put ' in password or username, I was lazy programmer", Snackbar.LENGTH_LONG).show();
+            return;
+        }
+
         String data="";
         //logika
         copyDataBase();
         executeCommand("/system/bin/chmod 744 /data/data/" + getPackageName() + "/passgen");
-        data = executeCommand("/data/data/" + getPackageName() + "/passgen " + username.getText().toString() + " " + password.getText().toString() + " " + key);
-        //Toast.makeText(this, data, Toast.LENGTH_LONG).show();
+        String usernameString = username.getText().toString();
+        String passwordString = password.getText().toString();
+        usernameString = usernameString.replace(" ", "\u200b");
+        passwordString = passwordString.replace(" ", "\u200b");
+        String cmd = "/data/data/" + getPackageName() + "/passgen " + usernameString + " " + passwordString + " " + key;
+        data = executeCommand(cmd);
         //kraj logike
         //writeToFile(fileName.getText().toString(), data);
-        Log.i("Sifra", data);
         writeToFile(Environment.getExternalStorageDirectory().getPath() + "/Passwords/" + fileName.getText().toString().replace('/', '⁄'), data);
         if (getIntent().getBooleanExtra("isAccessibility", false)){
             Intent output = new Intent();

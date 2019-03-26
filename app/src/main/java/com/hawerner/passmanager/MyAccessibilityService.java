@@ -125,7 +125,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 checkFloatingIfNeeded(getRootInActiveWindow());
             }
             catch (Exception e){
-                if (e.toString().equals("java.lang.Exception: password polje")) {
+                if (e.getMessage().equals("password polje")) {
                     showFloating();
                 }
                 else{
@@ -137,14 +137,14 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     private void checkFloatingIfNeeded(AccessibilityNodeInfo node) throws Exception {
-        if (currentPackageName.equals(getApplicationContext().getPackageName())) {
+        if (currentPackageName.equals(getApplicationContext().getPackageName()) || getApplicationContext().getPackageName().equals("com.android.systemui")) {
             return;
         }
         checkFloatingIfNeeded(node, 0);
     }
     private void checkFloatingIfNeeded(AccessibilityNodeInfo node, int deep) throws Exception {
         if (node == null) {
-            Log.v("Accessibility", "node is null (stopping iteration)");
+            //Log.v("Accessibility", "node is null (stopping iteration)");
             return;
         }
 
@@ -156,8 +156,8 @@ public class MyAccessibilityService extends AccessibilityService {
             try {
                 checkFloatingIfNeeded(node.getChild(i), deep + 1);
             }catch (Exception e){
-                Log.i("Accessibility", e.toString());
-                if (e.toString().equals("java.lang.Exception: password polje")) {
+                //Log.i("Accessibility", e.toString());
+                if (e.getMessage().equals("password polje")) {
                     Log.i("Accessibility", "Valjda je " + (deep) + ", " + (i - 1) + " mejl");
                     if (deepForPassword == -1) {
                         deepForPassword = deep;
@@ -172,7 +172,7 @@ public class MyAccessibilityService extends AccessibilityService {
         node.recycle();
         deepForPassword = -1;
         childForPassword = new Stack<>();
-        Log.v("Accessibility", "showIfNeededDone");
+        //Log.v("Accessibility", "showIfNeededDone");
     }
 
     private void showFloating() {

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -59,7 +60,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")) {
+        Preferences.init(getApplicationContext());
+        if (Preferences.sharedPreferences.getBoolean(Preferences.darkMode, false)) {
             setTheme(R.style.AppThemeDark);
         }
         else {
@@ -328,7 +330,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 dir.mkdir();
             }
 
-            if(Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+            Preferences.init(getApplicationContext());
+            if(Preferences.sharedPreferences.getBoolean(Preferences.darkMode, false)){
                 setTheme(R.style.AppThemeDark);
             }
             else {
@@ -473,7 +476,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void setDarkModeSwitch(){
-        boolean isChecked = Fajl.readFromFile("darkMode", getApplicationContext()).equals("true");
+        boolean isChecked = Preferences.sharedPreferences.getBoolean(Preferences.darkMode, false);
         try {
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             RelativeLayout red = (RelativeLayout) navigationView.getMenu().getItem(0).getActionView();
@@ -531,7 +534,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         else{
             disableDarkMode();
         }*/
-        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+        if (Preferences.sharedPreferences.getBoolean(Preferences.darkMode, false)){
             disableDarkMode();
         }
         else{
@@ -540,13 +543,17 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void disableDarkMode() {
-        Fajl.writeToFile("darkMode", "false", getApplicationContext());
+        SharedPreferences.Editor pref =  Preferences.sharedPreferences.edit();
+        pref.putBoolean(Preferences.darkMode, false);
+        pref.apply();
         setTheme(R.style.AppTheme);
         this.reload();
     }
 
     private void enableDarkMode() {
-        Fajl.writeToFile("darkMode", "true", getApplicationContext());
+        SharedPreferences.Editor pref =  Preferences.sharedPreferences.edit();
+        pref.putBoolean(Preferences.darkMode, true);
+        pref.apply();
         setTheme(R.style.AppThemeDark);
         this.reload();
     }

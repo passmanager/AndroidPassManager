@@ -20,7 +20,8 @@ public class AddAccount extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+        Preferences.init(getApplicationContext());
+        if (Preferences.sharedPreferences.getBoolean(Preferences.darkMode, false)){
             setTheme(R.style.AppThemeDark);
         }
         else{

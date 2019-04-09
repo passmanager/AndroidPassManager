@@ -177,7 +177,8 @@ public class MyAccessibilityService extends AccessibilityService {
 
     private void showFloating() {
         Log.v("Accessibility", "showFloating()");
-        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+        Preferences.init(getApplicationContext());
+        if (Preferences.sharedPreferences.getBoolean(Preferences.darkMode, false)){
             setTheme(R.style.AppThemeDark);
         }
         else {

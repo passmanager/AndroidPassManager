@@ -21,4 +21,7 @@
     <string name="nav_header_subtitle"> </string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
+    <string name="sharedPrefernces">@string/app_name</string>
+    <string name="dark_mode">Dark mode</string>
+    <string name="biometric_unlock">Fingerprint unlock</string>
 </resources>

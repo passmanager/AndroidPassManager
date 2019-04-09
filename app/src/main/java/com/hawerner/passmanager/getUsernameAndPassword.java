@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.NavigationView;
@@ -55,7 +56,8 @@ public class getUsernameAndPassword extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+        Preferences.init(getApplicationContext());
+        if (Preferences.sharedPreferences.getBoolean(Preferences.darkMode, false)){
             setTheme(R.style.AppThemeDark);
         }
         else {
@@ -433,7 +435,8 @@ public class getUsernameAndPassword extends AppCompatActivity {
     }
 
     public void setDarkModeSwitch(){
-        boolean isChecked = Fajl.readFromFile("darkMode", getApplicationContext()).equals("true");
+        Preferences.init(getApplicationContext());
+        boolean isChecked = Preferences.sharedPreferences.getBoolean(Preferences.darkMode, false);
         try {
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             RelativeLayout red = (RelativeLayout) navigationView.getMenu().getItem(0).getActionView();
@@ -458,13 +461,17 @@ public class getUsernameAndPassword extends AppCompatActivity {
     }
 
     private void disableDarkMode() {
-        Fajl.writeToFile("darkMode", "false", getApplicationContext());
+        SharedPreferences.Editor pref = Preferences.sharedPreferences.edit();
+        pref.putBoolean(Preferences.darkMode, false);
+        pref.apply();
         setTheme(R.style.AppTheme);
         this.reload();
     }
 
     private void enableDarkMode() {
-        Fajl.writeToFile("darkMode", "true", getApplicationContext());
+        SharedPreferences.Editor pref = Preferences.sharedPreferences.edit();
+        pref.putBoolean(Preferences.darkMode, true);
+        pref.apply();
         setTheme(R.style.AppThemeDark);
         this.reload();
     }

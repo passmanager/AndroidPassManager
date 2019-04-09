@@ -3,6 +3,8 @@ package com.hawerner.passmanager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -29,7 +31,8 @@ public class PasswordActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        if (Fajl.readFromFile("darkMode", getApplicationContext()).equals("true")){
+        Preferences.init(getApplicationContext());
+        if (Preferences.sharedPreferences.getBoolean(Preferences.darkMode, false)){
             setTheme(R.style.AppThemeDark);
         }
         else{
@@ -47,6 +50,10 @@ public class PasswordActivity extends AppCompatActivity {
         setTitle(intent.getStringExtra("file"));
         final String key = getIntent().getStringExtra("key");
         final File file = new File(intent.getStringExtra("dir"), intent.getStringExtra("file"));
+        final String packageName = getPackageName(intent.getStringExtra("file"));
+        if (packageName != null){
+            Log.i("PasswordActivity", packageName);
+        }
         BufferedReader br;
         try {
             br = new BufferedReader(new FileReader(file));
@@ -157,5 +164,17 @@ public class PasswordActivity extends AppCompatActivity {
         //String decrypted = "tetetetetete";
         return decrypted;
         //return decrypted;
+    }
+
+    String getPackageName(String appName){
+        final PackageManager pm = getPackageManager();
+        List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        for (ApplicationInfo app : packages){
+            if (appName.equals(pm.getApplicationLabel(app).toString())){
+                return app.packageName;
+            }
+        }
+
+        return null;
     }
 }

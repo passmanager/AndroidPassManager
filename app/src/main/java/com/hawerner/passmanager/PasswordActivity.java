@@ -5,9 +5,11 @@ import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -28,6 +30,8 @@ import java.util.List;
 
 public class PasswordActivity extends AppCompatActivity {
 
+    AppCompatImageView iconView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -43,6 +47,8 @@ public class PasswordActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_password);
 
+        iconView = (AppCompatImageView) findViewById(R.id.entry_icon);
+
 
         Slidr.attach(this);
 
@@ -50,10 +56,7 @@ public class PasswordActivity extends AppCompatActivity {
         setTitle(intent.getStringExtra("file"));
         final String key = getIntent().getStringExtra("key");
         final File file = new File(intent.getStringExtra("dir"), intent.getStringExtra("file"));
-        final String packageName = getPackageName(intent.getStringExtra("file"));
-        if (packageName != null){
-            Log.i("PasswordActivity", packageName);
-        }
+
         BufferedReader br;
         try {
             br = new BufferedReader(new FileReader(file));
@@ -83,8 +86,11 @@ public class PasswordActivity extends AppCompatActivity {
 
             ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
             ClipData data = ClipData.newPlainText("Šifra", password);
+            assert cm != null;
             cm.setPrimaryClip(data);
             Snackbar.make(findViewById(R.id.passwordActivity), "Password has been copied to clipboard", Snackbar.LENGTH_LONG).show();
+
+            setIcon();
 
         } catch (IOException e) {
             Log.e("reading file", "", e);
@@ -176,5 +182,28 @@ public class PasswordActivity extends AppCompatActivity {
         }
 
         return null;
+    }
+
+    void setIcon(){
+        //final String packageName = getPackageName(getIntent().getStringExtra("file"));
+        final String packageName = null;
+        if (packageName != null){
+            Log.i("PasswordActivity", packageName);
+            try{
+                Drawable icon = getApplicationContext().getPackageManager().getApplicationIcon(packageName);
+                iconView.setImageDrawable(icon);
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        else{
+            Preferences.init(getApplicationContext());
+            if (Preferences.sharedPreferences.getBoolean(Preferences.darkMode, false)) {
+                iconView.setImageResource(R.drawable.ic_lock_white);
+            }
+            else{
+                iconView.setImageResource(R.drawable.ic_lock_black);
+            }
+        }
     }
 }

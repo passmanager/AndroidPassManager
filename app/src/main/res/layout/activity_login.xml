@@ -10,7 +10,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <EditText
@@ -18,20 +18,20 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:hint="@string/enter_master_key"
-            android:textAlignment="center"
-            android:inputType="textNoSuggestions|textPassword"
-            android:importantForAutofill="no"
             android:importantForAccessibility="no"
-            tools:ignore="UnusedAttribute"
-            android:textColor="?attr/colorAccent"/>
+            android:importantForAutofill="no"
+            android:inputType="textNoSuggestions|textPassword"
+            android:textAlignment="center"
+            android:textColor="?attr/colorAccent"
+            tools:ignore="UnusedAttribute" />
 
         <Button
+            android:id="@+id/loginbutton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/loginbutton"
             android:onClick="loginButton"
             android:text="@string/login_text"
-            android:textColor="?attr/colorAccent"
-            />
+            android:textColor="?attr/colorAccent" />
     </LinearLayout>
+
 </android.support.design.widget.CoordinatorLayout>

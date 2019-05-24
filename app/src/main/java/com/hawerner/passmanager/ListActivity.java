@@ -284,7 +284,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             });
             fab.bringToFront();*/
             setDarkModeSwitch();
-            this.onResume();
+            this.loadList();
         }
     }
 
@@ -324,6 +324,38 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         super.onResume();
 
+        if (disposable != null && disposable.isDisposed()) {
+            disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted", getApplicationContext()))
+                    .subscribe(decryptionResult -> {
+                        switch (decryptionResult.getResult()) {
+                            case FAILED:
+                                Toast.makeText(getApplicationContext(), "Fingerprint not recognized, try again!", Toast.LENGTH_LONG).show();
+                                break;
+                            case HELP:
+                                Toast.makeText(getApplicationContext(), decryptionResult.getMessage(), Toast.LENGTH_LONG).show();
+                                break;
+                            case AUTHENTICATED:
+                                //Toast.makeText(getApplicationContext(), "decrypted:\n" + decryptionResult.getDecrypted(), Toast.LENGTH_LONG).show();
+                                ((EditText) findViewById(R.id.enterkey)).setText(decryptionResult.getDecrypted());
+                                login();
+                                break;
+                        }
+                    }, throwable -> {
+                        //noinspection StatementWithEmptyBody
+                        if (RxFingerprint.keyInvalidated(throwable)) {
+                            // The keys you wanted to use are invalidated because the user has turned off his
+                            // secure lock screen or changed the fingerprints stored on the device
+                            // You have to re-encrypt the data to access it
+                            Toast.makeText(getApplicationContext(), "You will need to authenticate using password", Toast.LENGTH_LONG).show();
+                            needToReEncrypt = true;
+                        }
+                        Log.e("ERROR", "decrypt", throwable);
+                    });
+        }
+
+    }
+
+    protected void loadList(){
         if (!key.equals("")) {
             final File dir = new File(Environment.getExternalStorageDirectory(), "/Passwords/");
             if (!dir.exists()) {
@@ -400,34 +432,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     return true;
                 }
             });
-        }
-        else if (disposable != null && disposable.isDisposed()) {
-            disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted", getApplicationContext()))
-                    .subscribe(decryptionResult -> {
-                        switch (decryptionResult.getResult()) {
-                            case FAILED:
-                                Toast.makeText(getApplicationContext(), "Fingerprint not recognized, try again!", Toast.LENGTH_LONG).show();
-                                break;
-                            case HELP:
-                                Toast.makeText(getApplicationContext(), decryptionResult.getMessage(), Toast.LENGTH_LONG).show();
-                                break;
-                            case AUTHENTICATED:
-                                //Toast.makeText(getApplicationContext(), "decrypted:\n" + decryptionResult.getDecrypted(), Toast.LENGTH_LONG).show();
-                                ((EditText) findViewById(R.id.enterkey)).setText(decryptionResult.getDecrypted());
-                                login();
-                                break;
-                        }
-                    }, throwable -> {
-                        //noinspection StatementWithEmptyBody
-                        if (RxFingerprint.keyInvalidated(throwable)) {
-                            // The keys you wanted to use are invalidated because the user has turned off his
-                            // secure lock screen or changed the fingerprints stored on the device
-                            // You have to re-encrypt the data to access it
-                            Toast.makeText(getApplicationContext(), "You will need to authenticate using password", Toast.LENGTH_LONG).show();
-                            needToReEncrypt = true;
-                        }
-                        Log.e("ERROR", "decrypt", throwable);
-                    });
         }
     }
 

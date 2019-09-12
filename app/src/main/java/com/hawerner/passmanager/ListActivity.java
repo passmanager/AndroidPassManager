@@ -239,7 +239,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                         .subscribe(encryptionResult -> {
                             switch (encryptionResult.getResult()) {
                                 default:
-                                    Toast.makeText(getApplicationContext(), "Fingerprint not recognized, try again!", Toast.LENGTH_LONG).show();
                                     writeToFile("keyCrypted", encryptionResult.getEncrypted());
                                     break;
                             }
@@ -262,7 +261,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                         .subscribe(encryptionResult -> {
                             switch (encryptionResult.getResult()) {
                                 default:
-                                    Toast.makeText(getApplicationContext(), "Fingerprint not recognized, try again!", Toast.LENGTH_LONG).show();
                                     writeToFile("keyCrypted", encryptionResult.getEncrypted());
                                     break;
                             }

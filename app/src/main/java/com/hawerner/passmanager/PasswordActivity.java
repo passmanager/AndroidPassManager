@@ -55,52 +55,29 @@ public class PasswordActivity extends AppCompatActivity {
         final Intent intent = getIntent();
         setTitle(intent.getStringExtra("file"));
         final String key = getIntent().getStringExtra("key");
-        final File file = new File(intent.getStringExtra("dir"), intent.getStringExtra("file"));
+        final String file = intent.getStringExtra("file");
 
-        BufferedReader br;
-        try {
-            br = new BufferedReader(new FileReader(file));
-        } catch (FileNotFoundException e) {
-            Log.d("not found", "", e);
-            finish();
-            return;
-        }
-        try {
-            List<String> lines = new ArrayList<>();
-            String line = br.readLine();
-            while (line != null) {
-                lines.add(line);
-                line = br.readLine();
-            }
-            String usernameSalt = lines.get(0);
-            String username = decrypt(lines.get(1), key, usernameSalt);
-            username = username.replace("\u200b", " ");
-            String passwordSalt = lines.get(2);
-            String password = decrypt(lines.get(3), key, passwordSalt);
-            password = password.replace("\u200b", " ");
+        Password entry = new Password(key, getApplicationContext());
 
-            TextView userTextView = findViewById(R.id.usernameTextView);
-            TextView pwdTextView = findViewById(R.id.passwordTextView);
-            userTextView.setText(username);
-            pwdTextView.setText(password);
+        entry.setName(file);
+        entry.load();
 
-            ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-            ClipData data = ClipData.newPlainText("Šifra", password);
-            assert cm != null;
-            cm.setPrimaryClip(data);
-            Snackbar.make(findViewById(R.id.passwordActivity), "Password has been copied to clipboard", Snackbar.LENGTH_LONG).show();
+        String username = entry.getUsername();
+        String password = entry.getPassword();
 
-            setIcon();
+        TextView userTextView = findViewById(R.id.usernameTextView);
+        TextView pwdTextView = findViewById(R.id.passwordTextView);
+        userTextView.setText(username);
+        pwdTextView.setText(password);
 
-        } catch (IOException e) {
-            Log.e("reading file", "", e);
-        } finally {
-            try {
-                br.close();
-            } catch (IOException e) {
-                Log.e("closing reader", "", e);
-            }
-        }
+        ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        ClipData data = ClipData.newPlainText("Šifra", password);
+        assert cm != null;
+        cm.setPrimaryClip(data);
+        Snackbar.make(findViewById(R.id.passwordActivity), "Password has been copied to clipboard", Snackbar.LENGTH_LONG).show();
+
+        setIcon();
+
     }
 
     //jos malo kopiranja
@@ -158,18 +135,6 @@ public class PasswordActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-    String decrypt(String str, String key, String salt) {
-        copyDataBase();
-        //Toast.makeText(this,"Copied exe", Toast.LENGTH_LONG).show();
-        executeCommand("/system/bin/chmod 744 /data/data/" + getPackageName() + "/passread");
-        //Toast.makeText(this,"Changed permissions", Toast.LENGTH_LONG).show();
-        //Toast.makeText(this,"/data/data/" + getPackageName() + "/passread " + salt + " " + str + " " + key, Toast.LENGTH_LONG).show();
-        String decrypted = executeCommand("/data/data/" + getPackageName() + "/passread " + salt + " " + str + " " + key);
-        //Toast.makeText(this,"Command executed", Toast.LENGTH_LONG).show();
-        //String decrypted = "tetetetetete";
-        return decrypted;
-        //return decrypted;
     }
 
     String getPackageName(String appName){

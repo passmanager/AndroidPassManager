@@ -269,7 +269,7 @@ public class getUsernameAndPassword extends AppCompatActivity {
 
         final File dir = new File(Environment.getExternalStorageDirectory(), "/Passwords/");
         if (!dir.exists()) {
-            dir.mkdir();
+            dir.mkdirs();
         }
 
         String fileWanted = getIntent().getStringExtra("URI");

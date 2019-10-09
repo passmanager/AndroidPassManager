@@ -357,7 +357,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         if (!key.equals("")) {
             final File dir = new File(Environment.getExternalStorageDirectory(), "/Passwords/");
             if (!dir.exists()) {
-                dir.mkdir();
+                dir.mkdirs();
             }
 
             Preferences.init(getApplicationContext());
@@ -368,11 +368,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 setTheme(R.style.AppTheme);
             }
 
-            final List<String> files = new ArrayList<>();
-            for (File file : dir.listFiles()) {
-                files.add(file.getName());
-            }
-            Collections.sort(files, String.CASE_INSENSITIVE_ORDER);
+            final List<String> files = Password.getAllNames();
             final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, files);
             final ListView list = findViewById(R.id.filesListView);
             assert list != null;

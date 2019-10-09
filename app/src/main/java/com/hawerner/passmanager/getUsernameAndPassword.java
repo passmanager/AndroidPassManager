@@ -197,74 +197,6 @@ public class getUsernameAndPassword extends AppCompatActivity {
         return keytmp;
     }
 
-    private void copyDataBase()
-    {
-        try
-        {
-            InputStream myInput = getAssets().open("passread");
-            String outFileName = "/data/data/" + getPackageName() + "/passread";
-            executeCommand("rm -f " + outFileName);
-            OutputStream myOutput = new FileOutputStream(outFileName);
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = myInput.read(buffer))>0)
-            {
-                myOutput.write(buffer, 0, length);
-            }
-
-            myOutput.flush();
-            myOutput.close();
-            myInput.close();
-        }
-        catch(Exception ex)
-        {
-            ex.printStackTrace();
-        }
-
-    }
-
-    //gotovo kopiranje
-    String executeCommand(String cmd){
-        try {
-            // Executes the command.
-            Process process = Runtime.getRuntime().exec(cmd);
-
-            // Reads stdout.
-            // NOTE: You can write to stdin of the command using
-            //       process.getOutputStream().
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
-            int read;
-            char[] buffer = new char[4096];
-            StringBuffer output = new StringBuffer();
-            while ((read = reader.read(buffer)) > 0) {
-                output.append(buffer, 0, read);
-            }
-            reader.close();
-
-            // Waits for the command to finish.
-            process.waitFor();
-
-            return output.toString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    String decrypt(String str, String key, String salt) {
-        copyDataBase();
-        //Toast.makeText(this,"Copied exe", Toast.LENGTH_LONG).show();
-        executeCommand("/system/bin/chmod 744 /data/data/" + getPackageName() + "/passread");
-        //Toast.makeText(this,"Changed permissions", Toast.LENGTH_LONG).show();
-        //Toast.makeText(this,"/data/data/" + getPackageName() + "/passread " + salt + " " + str + " " + key, Toast.LENGTH_LONG).show();
-        String decrypted = executeCommand("/data/data/" + getPackageName() + "/passread " + salt + " " + str + " " + key);
-        //Toast.makeText(this,"Command executed", Toast.LENGTH_LONG).show();
-        //String decrypted = "tetetetetete";
-        return decrypted;
-        //return decrypted;
-    }
-
     private void loadList(){
 
         final File dir = new File(Environment.getExternalStorageDirectory(), "/Passwords/");
@@ -278,9 +210,9 @@ public class getUsernameAndPassword extends AppCompatActivity {
             files.add(file.getName());
             if (file.getName().equals(fileWanted)){
                 Log.i("T", "onItemClick started");
+
                 Password entry = new Password(key, getApplicationContext());
                 entry.setName(fileWanted);
-
                 entry.load();
                 entry.decrypt();
 
@@ -318,58 +250,29 @@ public class getUsernameAndPassword extends AppCompatActivity {
             list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    Log.i("T", "onItemClick started");
-                    BufferedReader br;
-                    final File file = new File(dir, files.get(i));
-                    try {
-                        br = new BufferedReader(new FileReader(file));
-                    } catch (FileNotFoundException e) {
-                        Log.d("not found", "", e);
-                        finish();
-                        return;
+
+                    Password entry = new Password(key, getApplicationContext());
+                    entry.setName(files.get(i));
+                    entry.load();
+                    entry.decrypt();
+
+                    String username = entry.getUsername();
+                    String password = entry.getPassword();
+                    Log.i("T", "making intent started");
+                    Intent output = new Intent();
+                    output.putExtra("username", username);
+                    output.putExtra("password", password);
+                    Log.i("T", username);
+                    Log.i("T", "returning");
+                    boolean isAccessibility = getIntent().getBooleanExtra("isAccessibility", false);
+                    if (isAccessibility) {
+                        Intent intent = new Intent(getUsernameAndPassword.this, MyAccessibilityService.class);
+                        intent.setAction("com.hawerner.passmanager.MyAccessibilityService");
+                        intent.putExtra("username", username);
+                        intent.putExtra("password", password);
+                        startService(intent);
                     }
-                    try {
-                        List<String> lines = new ArrayList<>();
-                        String line = br.readLine();
-                        while (line != null) {
-                            lines.add(line);
-                            line = br.readLine();
-                        }
-                        Log.i("T", "file read done");
-                        String usernameSalt = lines.get(0);
-                        String username = decrypt(lines.get(1), key, usernameSalt);
-                        String passwordSalt = lines.get(2);
-                        String password = decrypt(lines.get(3), key, passwordSalt);
-
-                        Log.i("T", "making intent started");
-                        Intent output = new Intent();
-                        output.putExtra("username", username);
-                        output.putExtra("password", password);
-                        Log.i("T", username);
-                        Log.i("T", "returning");
-                        boolean isAccessibility = getIntent().getBooleanExtra("isAccessibility", false);
-                        if (isAccessibility) {
-                            Intent intent = new Intent(getUsernameAndPassword.this, MyAccessibilityService.class);
-                            intent.setAction("com.hawerner.passmanager.MyAccessibilityService");
-                            intent.putExtra("username", username);
-                            intent.putExtra("password", password);
-                            startService(intent);
-                        }
-                        setResult(Activity.RESULT_OK, output);
-                        finish();
-
-                    } catch (IOException e) {
-                        Log.e("reading file", "", e);
-                        setResult(Activity.RESULT_CANCELED);
-                        finish();
-                    } finally {
-                        try {
-                            br.close();
-                        } catch (IOException e) {
-                            Log.e("closing reader", "", e);
-                        }
-                    }
-
+                    setResult(Activity.RESULT_OK, output);
                     finish();
                 }
             });

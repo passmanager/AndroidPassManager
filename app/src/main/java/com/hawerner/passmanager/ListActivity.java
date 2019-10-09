@@ -89,6 +89,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 setContentView(R.layout.activity_password_list);
                 setDarkModeSwitch();
                 this.onResume();
+                this.loadList();
                 return;
             }
         }catch (Exception ignored){
@@ -322,7 +323,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         super.onResume();
 
-        if (disposable != null && disposable.isDisposed()) {
+        if (key.equals("") && disposable != null && disposable.isDisposed()) {
             disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted"))
                     .subscribe(decryptionResult -> {
                         switch (decryptionResult.getResult()) {
@@ -444,18 +445,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             outputStream.close();
         } catch (Exception e) {
             Log.e("T", e.toString());
-        }
-    }
-
-
-    //copy paste from other class
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
     }
 

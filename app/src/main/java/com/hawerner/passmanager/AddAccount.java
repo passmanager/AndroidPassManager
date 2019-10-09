@@ -67,19 +67,12 @@ public class AddAccount extends AppCompatActivity {
             return;
         }
 
-        String data="";
-        //logika
-        copyDataBase();
-        executeCommand("/system/bin/chmod 744 /data/data/" + getPackageName() + "/passgen");
-        String usernameString = username.getText().toString();
-        String passwordString = password.getText().toString();
-        usernameString = usernameString.replace(" ", "\u200b");
-        passwordString = passwordString.replace(" ", "\u200b");
-        String cmd = "/data/data/" + getPackageName() + "/passgen " + usernameString + " " + passwordString + " " + key;
-        data = executeCommand(cmd);
-        //kraj logike
-        //writeToFile(fileName.getText().toString(), data);
-        writeToFile(Environment.getExternalStorageDirectory().getPath() + "/Passwords/" + fileName.getText().toString().replace('/', '⁄'), data);
+        Password entry = new Password(key, getApplicationContext());
+
+        entry.setName(fileName.getText().toString());
+        entry.setUsername(username.getText().toString());
+        entry.setPassword(password.getText().toString());
+        entry.save();
         if (getIntent().getBooleanExtra("isAccessibility", false)){
             Intent output = new Intent();
             output.putExtra("username", username.getText().toString());
@@ -87,89 +80,5 @@ public class AddAccount extends AppCompatActivity {
             setResult(RESULT_OK, output);
         }
         finish();
-    }
-
-    private void copyDataBase()
-    {
-        try
-        {
-            InputStream myInput = getAssets().open("passgen");
-            String outFileName = "/data/data/" + getPackageName() + "/passgen";
-            executeCommand("rm -f " + outFileName);
-            OutputStream myOutput = new FileOutputStream(outFileName);
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = myInput.read(buffer))>0)
-            {
-                myOutput.write(buffer, 0, length);
-            }
-
-            myOutput.flush();
-            myOutput.close();
-            myInput.close();
-        }
-        catch(Exception ex)
-        {
-            ex.printStackTrace();
-        }
-    }
-
-    static String executeCommand(String cmd){
-        try {
-            // Executes the command.
-            Process process = Runtime.getRuntime().exec(cmd);
-
-            // Reads stdout.
-            // NOTE: You can write to stdin of the command using
-            //       process.getOutputStream().
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
-            int read;
-            char[] buffer = new char[4096];
-            StringBuffer output = new StringBuffer();
-            while ((read = reader.read(buffer)) > 0) {
-                output.append(buffer, 0, read);
-            }
-            reader.close();
-
-            // Waits for the command to finish.
-            process.waitFor();
-
-            return output.toString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    static public void writeToFile(String name, String data){
-        Log.i("T", data);
-        BufferedWriter writer = null;
-        try
-        {
-            writer = new BufferedWriter(new FileWriter(name));
-            writer.write(data);
-
-        }
-        catch ( IOException e)
-        {
-            Log.e("writeToFile", "Writing to file failed " + name);
-        }
-        catch (Exception e){
-            Log.e("writeToFile", "Writing to file failed " + name);
-        }
-        finally
-        {
-            try
-            {
-                if ( writer != null)
-                    writer.close( );
-            }
-            catch ( IOException e)
-            {
-            }
-        }
     }
 }

@@ -3,37 +3,65 @@ package com.hawerner.passmanager;
 import android.content.Context;
 import android.util.Log;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Fajl {
-    public static void writeToFile(String fileName, String data, Context context){
-        FileOutputStream outputStream;
+    public static void writeToFile(String fileName, String data){
+        Log.i("T", data);
+        BufferedWriter writer = null;
+        try
+        {
+            writer = new BufferedWriter(new FileWriter(fileName));
+            writer.write(data);
 
-        try {
-            outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE);
-            outputStream.write(data.getBytes());
-            outputStream.close();
-        } catch (Exception e) {
-            Log.i("T", e.toString());
-            e.printStackTrace();
+        }
+        catch ( IOException e)
+        {
+            Log.e("writeToFile", "Writing to file failed " + fileName);
+        }
+        catch (Exception e){
+            Log.e("writeToFile", "Writing to file failed " + fileName);
+        }
+        finally
+        {
+            try
+            {
+                if ( writer != null)
+                    writer.close( );
+            }
+            catch ( IOException e)
+            {
+            }
         }
     }
 
-    public static String readFromFile(String fileName, Context context){
+    public static String readFromFile(String fileName){
         FileInputStream inputStream;
-        String tmp = "";
+        StringBuilder tmp = new StringBuilder();
 
+        BufferedReader br;
         try {
-            inputStream = context.openFileInput(fileName);
-            int content;
-            while ((content = inputStream.read()) != -1) {
-                tmp += (char) content;
+            br = new BufferedReader(new FileReader(fileName));
+        } catch (FileNotFoundException e) {
+            Log.d("not found", "", e);
+            return null;
+        }
+        try {
+            String line = br.readLine();
+            while (line != null) {
+                tmp.append(line).append("\n");
+                line = br.readLine();
             }
-            inputStream.close();
         }
         catch (FileNotFoundException e){
 
@@ -41,11 +69,11 @@ public class Fajl {
         catch (IOException e1){
 
         }
-        return tmp;
+        return tmp.toString();
     }
 
-    public static void appendToFile(String fileName, String stringToAppend, Context context){
-        Fajl.writeToFile(fileName, Fajl.readFromFile(fileName, context) + stringToAppend, context);
+    public static void appendToFile(String fileName, String stringToAppend){
+        Fajl.writeToFile(fileName, Fajl.readFromFile(fileName) + stringToAppend);
     }
 
     public static Boolean fileExists(String fileName, Context context){

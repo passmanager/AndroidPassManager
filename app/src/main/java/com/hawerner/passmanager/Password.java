@@ -47,6 +47,18 @@ public class Password {
 
     public void crypt(){
 
+        String usernameString = username.replace(" ", "\u200b");
+        String passwordString = password.replace(" ", "\u200b");
+
+        String data;
+        String cmd = "/data/data/" + context.getPackageName() + "/passgen " + usernameString + " " + passwordString + " " + key;
+        data = executeCommand(cmd);
+        String[] lines = data.split("\n");
+        usernameSalt = lines[0];
+        usernameC = lines[1];
+        passwordSalt = lines[2];
+        passwordC = lines[3];
+
     }
 
     public void decrypt(){
@@ -58,28 +70,18 @@ public class Password {
     }
 
     public void save(){
-
-        //TODO: nije nista uradjeno
-
+        copyPassgen();
         String data="";
-        //logika
         copyPassgen();
         executeCommand("/system/bin/chmod 744 /data/data/" + context.getPackageName() + "/passgen");
         this.crypt();
-        String usernameString = username;
-        String passwordString = password;
-        usernameString = usernameString.replace(" ", "\u200b");
-        passwordString = passwordString.replace(" ", "\u200b");
-        String cmd = "/data/data/" + context.getPackageName() + "/passgen " + usernameString + " " + passwordString + " " + key;
-        data = executeCommand(cmd);
-        //kraj logike
-        //writeToFile(fileName.getText().toString(), data);
-        Fajl.writeToFile(Environment.getExternalStorageDirectory().getPath() + "/Passwords/" + name.replace('/', '⁄'), data, context);
+        data = usernameSalt + "\n" + usernameC + "\n" + passwordSalt + "\n" + passwordC;
+        Fajl.writeToFile(Environment.getExternalStorageDirectory().getPath() + "/Passwords/" + name.replace('/', '⁄'), data);
     }
 
     public void load(){
-        copyPassgen();
-        String data = Fajl.readFromFile(Environment.getExternalStorageDirectory().getPath() + "/Passwords/" + name.replace('/', '⁄'), context);
+        copyPassread();
+        String data = Fajl.readFromFile(Environment.getExternalStorageDirectory().getPath() + "/Passwords/" + name.replace('/', '⁄'));
         List<String> lines = Arrays.asList(data.split("\n"));
         usernameSalt = lines.get(0);
         passwordSalt = lines.get(2);
@@ -159,6 +161,30 @@ public class Password {
         }
     }
 
+    private void copyPassread(){
+        try
+        {
+            InputStream myInput = context.getAssets().open("passread");
+            String outFileName = "/data/data/" + context.getPackageName() + "/passread";
+            executeCommand("rm -f " + outFileName);
+            OutputStream myOutput = new FileOutputStream(outFileName);
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = myInput.read(buffer))>0)
+            {
+                myOutput.write(buffer, 0, length);
+            }
+
+            myOutput.flush();
+            myOutput.close();
+            myInput.close();
+        }
+        catch(Exception ex)
+        {
+            ex.printStackTrace();
+        }
+    }
+
     private static String executeCommand(String cmd){
         try {
             // Executes the command.
@@ -186,5 +212,13 @@ public class Password {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password){
+        this.password = password;
     }
 }

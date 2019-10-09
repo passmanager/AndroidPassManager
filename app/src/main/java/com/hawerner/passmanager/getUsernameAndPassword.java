@@ -139,7 +139,7 @@ public class getUsernameAndPassword extends AppCompatActivity {
             shouldContinue = false;
         }
         if (RxFingerprint.isAvailable(getUsernameAndPassword.this) && Fajl.fileExists("keyCrypted", getApplicationContext())) {
-            Disposable disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted", getApplicationContext()))
+            Disposable disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted"))
                     .subscribe(decryptionResult -> {
                         switch (decryptionResult.getResult()) {
                             case FAILED:
@@ -278,56 +278,30 @@ public class getUsernameAndPassword extends AppCompatActivity {
             files.add(file.getName());
             if (file.getName().equals(fileWanted)){
                 Log.i("T", "onItemClick started");
-                BufferedReader br;
-                final File file1 = new File(dir, fileWanted);
-                try {
-                    br = new BufferedReader(new FileReader(file1));
-                } catch (FileNotFoundException e) {
-                    Log.d("not found", "", e);
-                    finish();
-                    return;
-                }
-                try {
-                    List<String> lines = new ArrayList<>();
-                    String line = br.readLine();
-                    while (line != null) {
-                        lines.add(line);
-                        line = br.readLine();
-                    }
-                    Log.i("T", "file read done");
-                    String usernameSalt = lines.get(0);
-                    String username = decrypt(lines.get(1), key, usernameSalt);
-                    String passwordSalt = lines.get(2);
-                    String password = decrypt(lines.get(3), key, passwordSalt);
+                Password entry = new Password(key, getApplicationContext());
+                entry.setName(fileWanted);
 
-                    Log.i("T", "making intent started");
-                    Intent output = new Intent();
-                    output.putExtra("username", username);
-                    output.putExtra("password", password);
-                    Log.i("T", username);
-                    Log.i("T", "returning");
-                    boolean isAccessibility = getIntent().getBooleanExtra("isAccessibility", false);
-                    if (isAccessibility) {
-                        Intent intent = new Intent(getUsernameAndPassword.this, MyAccessibilityService.class);
-                        intent.setAction("com.hawerner.passmanager.MyAccessibilityService");
-                        intent.putExtra("username", username);
-                        intent.putExtra("password", password);
-                        startService(intent);
-                    }
-                    setResult(Activity.RESULT_OK, output);
-                    finish();
-                }catch (IOException e) {
-                    Log.e("reading file", "", e);
-                    setResult(Activity.RESULT_CANCELED);
-                    finish();
-                    return;
-                } finally {
-                    try {
-                        br.close();
-                    } catch (IOException e) {
-                        Log.e("closing reader", "", e);
-                    }
+                entry.load();
+                entry.decrypt();
+
+                String username = entry.getUsername();
+                String password = entry.getPassword();
+
+                Log.i("T", "making intent started");
+                Intent output = new Intent();
+                output.putExtra("username", username);
+                output.putExtra("password", password);
+                Log.i("T", username);
+                Log.i("T", "returning");
+                boolean isAccessibility = getIntent().getBooleanExtra("isAccessibility", false);
+                if (isAccessibility) {
+                    Intent intent = new Intent(getUsernameAndPassword.this, MyAccessibilityService.class);
+                    intent.setAction("com.hawerner.passmanager.MyAccessibilityService");
+                    intent.putExtra("username", username);
+                    intent.putExtra("password", password);
+                    startService(intent);
                 }
+                setResult(Activity.RESULT_OK, output);
                 shouldContinue = false;
                 finish();
                 return;

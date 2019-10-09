@@ -98,7 +98,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         Random generator = new SecureRandom();
 
         if (RxFingerprint.isAvailable(ListActivity.this) && Fajl.fileExists("keyCrypted", getApplicationContext())){
-            disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted", getApplicationContext()))
+            disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted"))
                     .subscribe(decryptionResult -> {
                         switch (decryptionResult.getResult()) {
                             case FAILED:
@@ -323,7 +323,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
 
         if (disposable != null && disposable.isDisposed()) {
-            disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted", getApplicationContext()))
+            disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted"))
                     .subscribe(decryptionResult -> {
                         switch (decryptionResult.getResult()) {
                             case FAILED:

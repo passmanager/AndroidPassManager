@@ -2,6 +2,7 @@ package com.hawerner.passmanager;
 
 import android.content.Context;
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,6 +17,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class Password {
+
+    private final String TAG = "PasswordClass";
 
     private String name;
     private String key;
@@ -71,18 +74,30 @@ public class Password {
 
     public void save(){
         copyPassgen();
-        String data="";
         copyPassgen();
         executeCommand("/system/bin/chmod 744 /data/data/" + context.getPackageName() + "/passgen");
-        this.crypt();
-        data = usernameSalt + "\n" + usernameC + "\n" + passwordSalt + "\n" + passwordC;
-        Fajl.writeToFile(Environment.getExternalStorageDirectory().getPath() + "/Passwords/" + name.replace('/', '⁄'), data);
+        if (usernameC == null || passwordC == null) this.crypt();
+
+        DBHelper dbHelper = new DBHelper(context.getApplicationContext());
+        try {
+            dbHelper.add(name, usernameSalt, usernameC, passwordSalt, passwordC);
+        } catch (DBHelper.NotUniqueException e) {
+            e.printStackTrace();
+            return;
+        }
     }
 
-    public void load(){
+    public void load() throws DBHelper.doesNotExistException {
         copyPassread();
-        String data = Fajl.readFromFile(Environment.getExternalStorageDirectory().getPath() + "/Passwords/" + name.replace('/', '⁄'));
-        List<String> lines = Arrays.asList(data.split("\n"));
+
+        DBHelper dbHelper = new DBHelper(context.getApplicationContext());
+        List<String> lines;
+        try {
+            lines = dbHelper.getByName(name);
+        } catch (DBHelper.doesNotExistException ignored) {
+            //TODO: Password#load() doesNotExistException
+            throw new DBHelper.doesNotExistException();
+        }
         usernameSalt = lines.get(0);
         passwordSalt = lines.get(2);
         usernameC = lines.get(1);
@@ -92,8 +107,20 @@ public class Password {
         password = password.replace("\u200b", " ");
     }
 
-    public static List<String> getAllNames(){
-        final File dir = new File(Environment.getExternalStorageDirectory(), "/Passwords/");
+    public void delete(){
+        DBHelper dbHelper = new DBHelper(context.getApplicationContext());
+        String id = null;
+        try {
+            id = dbHelper.getIdByName(name);
+        } catch (DBHelper.doesNotExistException e) {
+            Log.i(TAG, "Not found so no deleting :D");
+            return;
+        }
+        dbHelper.delete(id);
+    }
+
+    public static List<String> getAllNames(Context context){
+        /*final File dir = new File(Environment.getExternalStorageDirectory(), "/Passwords/");
         if (!dir.exists()) {
             dir.mkdirs();
         }
@@ -101,8 +128,11 @@ public class Password {
         for (File file : dir.listFiles()) {
             files.add(file.getName());
         }
-        Collections.sort(files, String.CASE_INSENSITIVE_ORDER);
-        return files;
+        */
+        DBHelper dbHelper = new DBHelper(context.getApplicationContext());
+        final List<String> passwords = dbHelper.getAllNames();
+        Collections.sort(passwords, String.CASE_INSENSITIVE_ORDER);
+        return passwords;
     }
 
     public String getUsernameSalt() {

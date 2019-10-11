@@ -47,6 +47,7 @@ import static com.hawerner.passmanager.ListActivity.getHash;
 
 public class getUsernameAndPassword extends AppCompatActivity {
 
+    private final String TAG = "getUsernameAndPassword";
     private String key = "";
     boolean shouldContinue = false;
     String keyHash, salt;
@@ -198,19 +199,10 @@ public class getUsernameAndPassword extends AppCompatActivity {
     }
 
     private void loadList(){
-
-        final File dir = new File(Environment.getExternalStorageDirectory(), "/Passwords/");
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
+        //TODO: Use database to load
         String fileWanted = getIntent().getStringExtra("URI");
-        final List<String> files = new ArrayList<>();
-        for (File file : dir.listFiles()) {
-            files.add(file.getName());
-            if (file.getName().equals(fileWanted)){
-                Log.i("T", "onItemClick started");
-
+        final List<String> files = Password.getAllNames(getApplicationContext());
+            try {
                 Password entry = new Password(key, getApplicationContext());
                 entry.setName(fileWanted);
                 entry.load();
@@ -237,8 +229,9 @@ public class getUsernameAndPassword extends AppCompatActivity {
                 shouldContinue = false;
                 finish();
                 return;
+            }catch (DBHelper.doesNotExistException ignored){
+
             }
-        }
         if (shouldContinue) {
             setContentView(R.layout.activity_password_list);
             setDarkModeSwitch();
@@ -253,7 +246,11 @@ public class getUsernameAndPassword extends AppCompatActivity {
 
                     Password entry = new Password(key, getApplicationContext());
                     entry.setName(files.get(i));
-                    entry.load();
+                    try {
+                        entry.load();
+                    } catch (DBHelper.doesNotExistException ignored) {
+                        Log.i(TAG, "Entry not found, but should be since it's clicked from GUI");
+                    }
                     entry.decrypt();
 
                     String username = entry.getUsername();

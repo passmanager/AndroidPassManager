@@ -31,6 +31,7 @@ import java.util.List;
 public class PasswordActivity extends AppCompatActivity {
 
     AppCompatImageView iconView;
+    private final String TAG = "PasswordActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +61,11 @@ public class PasswordActivity extends AppCompatActivity {
         Password entry = new Password(key, getApplicationContext());
 
         entry.setName(file);
-        entry.load();
+        try {
+            entry.load();
+        } catch (DBHelper.doesNotExistException e) {
+            Log.i(TAG, "Entry doesn't exist, but should since it's clicked from GUI");
+        }
 
         String username = entry.getUsername();
         String password = entry.getPassword();

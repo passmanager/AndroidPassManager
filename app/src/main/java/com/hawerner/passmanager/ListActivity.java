@@ -356,10 +356,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
     protected void loadList(){
         if (!key.equals("")) {
-            final File dir = new File(Environment.getExternalStorageDirectory(), "/Passwords/");
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
 
             Preferences.init(getApplicationContext());
             if(Preferences.sharedPreferences.getBoolean(Preferences.darkMode, false)){
@@ -369,7 +365,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 setTheme(R.style.AppTheme);
             }
 
-            final List<String> files = Password.getAllNames();
+            final List<String> files = Password.getAllNames(getApplicationContext());
             final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, files);
             final ListView list = findViewById(R.id.filesListView);
             assert list != null;
@@ -379,7 +375,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     Intent intent = new Intent(ListActivity.this, PasswordActivity.class);
                     intent.putExtra("file", files.get(i));
-                    intent.putExtra("dir", dir.getAbsolutePath());
                     intent.putExtra("key", key);
                     startActivity(intent);
                 }
@@ -397,15 +392,9 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            File fileToDelete = new File(Environment.getExternalStorageDirectory() + "/Passwords/", files.get(index));
-                            if (fileToDelete.delete()) {
-                                Log.v("long cliked", "fajl delited");
-                            } else {
-                                Log.v("long clicked", "fajl not delited");
-                            }
-                            //adapter.remove(files.get(index));
-                            //list.deferNotifyDataSetChanged();
-                            //files.remove(index);
+                            Password entry = new Password(key, getApplicationContext());
+                            entry.setName(files.get(index));
+                            entry.delete();
                             adapter.remove(files.get(index));
                             list.deferNotifyDataSetChanged();
 

@@ -11,6 +11,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.Gravity;
@@ -35,6 +36,7 @@ public class MyAccessibilityService extends AccessibilityService {
 
     String currentPackageName = "";
     String waitPackageName = "";
+    final String browserPackageName = "hawerner.browser";
 
     @Override
     public void onServiceConnected(){
@@ -137,7 +139,7 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     private void checkFloatingIfNeeded(AccessibilityNodeInfo node) throws Exception {
-        if (currentPackageName.equals(getApplicationContext().getPackageName()) || getApplicationContext().getPackageName().equals("com.android.systemui")) {
+        if (currentPackageName.equals(getApplicationContext().getPackageName()) || getApplicationContext().getPackageName().equals("com.android.systemui") || currentPackageName.equals(browserPackageName)) {
             return;
         }
         checkFloatingIfNeeded(node, 0);
@@ -274,18 +276,12 @@ public class MyAccessibilityService extends AccessibilityService {
                 if (e.toString().equals("java.lang.Exception: password polje")) {
                     try {
                         Log.i("Accessibility", "Trying to paste child " + i);
-                        ClipboardManager clipboard = (ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("label", password);
-                        ClipData clipOld = clipboard.getPrimaryClip();
-                        clipboard.setPrimaryClip(clip);
-                        node.getChild(i).performAction(AccessibilityNodeInfo.ACTION_FOCUS);
-                        node.getChild(i).performAction(AccessibilityNodeInfo.ACTION_PASTE);
-                        clip = ClipData.newPlainText("label", username);
-                        clipboard.setPrimaryClip(clip);
-                        node.getChild(i - 1).performAction(AccessibilityNodeInfo.ACTION_FOCUS);
-                        clipboard.setPrimaryClip(clip);
-                        node.getChild(i - 1).performAction(AccessibilityNodeInfo.ACTION_PASTE);
-                        clipboard.setPrimaryClip(clipOld);
+                        Bundle arguments = new Bundle();
+                        arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, password);
+                        node.getChild(i).performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+
+                        arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, username);
+                        node.getChild(i - 1).performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
                     } catch (Exception e1) {
                         Log.i("Accessibility", "Nesto je crklo");
                         Log.i("Accessibility", e1.toString());

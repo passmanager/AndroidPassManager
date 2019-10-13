@@ -6,7 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Environment;
+
 import com.google.android.material.navigation.NavigationView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
@@ -25,7 +26,6 @@ import android.widget.Toast;
 import com.mtramin.rxfingerprint.EncryptionMethod;
 import com.mtramin.rxfingerprint.RxFingerprint;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -48,6 +48,13 @@ public class getUsernameAndPassword extends AppCompatActivity {
     boolean showAd;
     private EditText keyInput;
     String keyName = "key";
+    boolean showingAll = false;
+    boolean displayButton = false;
+    List<String> allEntries = null;
+    List<String> entries = new ArrayList<>();
+    List<String> possibleEntries = new ArrayList<>();
+    ArrayAdapter<String> adapter = null;
+    ListView list = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +76,7 @@ public class getUsernameAndPassword extends AppCompatActivity {
                 shouldContinue = true;
                 setContentView(R.layout.activity_password_list);
                 setDarkModeSwitch();
-                this.loadList();
+                this.selectDataToLoadList();
                 return;
             }
         }catch (Exception ignored){
@@ -180,7 +187,7 @@ public class getUsernameAndPassword extends AppCompatActivity {
                     .setMessage("Key you entered isn't correct").show();
         }
         if (shouldContinue) {
-            loadList();
+            selectDataToLoadList();
         }
     }
 
@@ -192,54 +199,80 @@ public class getUsernameAndPassword extends AppCompatActivity {
         return keytmp;
     }
 
-    private void loadList(){
+    private void selectDataToLoadList(){
         //TODO: Use database to load
-        String fileWanted = getIntent().getStringExtra("URI");
-        final List<String> files = Password.getAllNames(getApplicationContext());
+        String wantedPackageName = getIntent().getStringExtra("URI");
+        allEntries = Password.getAllNames(getApplicationContext());
+        Collections.sort(allEntries, String.CASE_INSENSITIVE_ORDER);
+        if (wantedPackageName != null) {
+            Password entry = new Password(key, getApplicationContext());
             try {
-                Password entry = new Password(key, getApplicationContext());
-                entry.setName(fileWanted);
-                entry.load();
-                entry.decrypt();
+                DBHelper dbHelper = new DBHelper(getApplicationContext());
+                possibleEntries = dbHelper.getNamesByPackageName(wantedPackageName);
+                Collections.sort(possibleEntries, String.CASE_INSENSITIVE_ORDER);
+                displayButton = true;
 
-                String username = entry.getUsername();
-                String password = entry.getPassword();
+                if (possibleEntries.size() == 0) throw new Exception("Load all");
 
-                Log.i("T", "making intent started");
-                Intent output = new Intent();
-                output.putExtra("username", username);
-                output.putExtra("password", password);
-                Log.i("T", username);
-                Log.i("T", "returning");
-                boolean isAccessibility = getIntent().getBooleanExtra("isAccessibility", false);
-                if (isAccessibility) {
-                    Intent intent = new Intent(getUsernameAndPassword.this, MyAccessibilityService.class);
-                    intent.setAction("com.hawerner.passmanager.MyAccessibilityService");
-                    intent.putExtra("username", username);
-                    intent.putExtra("password", password);
-                    startService(intent);
+                if (possibleEntries.size() == 1) {
+                    entry.setName(possibleEntries.get(0));
+                    entry.load();
+                    entry.decrypt();
+
+                    String username = entry.getUsername();
+                    String password = entry.getPassword();
+
+                    Log.i("T", "making intent started");
+                    Intent output = new Intent();
+                    output.putExtra("username", username);
+                    output.putExtra("password", password);
+                    Log.i("T", username);
+                    Log.i("T", "returning");
+                    boolean isAccessibility = getIntent().getBooleanExtra("isAccessibility", false);
+                    if (isAccessibility) {
+                        Intent intent = new Intent(getUsernameAndPassword.this, MyAccessibilityService.class);
+                        intent.setAction("com.hawerner.passmanager.MyAccessibilityService");
+                        intent.putExtra("username", username);
+                        intent.putExtra("password", password);
+                        startService(intent);
+                    }
+                    setResult(Activity.RESULT_OK, output);
+                    shouldContinue = false;
+                    finish();
+                    return;
                 }
-                setResult(Activity.RESULT_OK, output);
-                shouldContinue = false;
-                finish();
-                return;
-            }catch (DBHelper.doesNotExistException ignored){
+                entries = possibleEntries;
+                loadList();
+            } catch (DBHelper.doesNotExistException ignored) {
 
             }
+            catch (Exception e){
+                if ("Load all".equals(e.getMessage())){
+                    entries = allEntries;
+                    displayButton = false;
+                    loadList();
+                }
+            }
+        }
+
+    }
+
+    public void loadList(){
         if (shouldContinue) {
             setContentView(R.layout.activity_password_list);
             setDarkModeSwitch();
             //this.onResume();
-            Collections.sort(files, String.CASE_INSENSITIVE_ORDER);
-            final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, files);
-            final ListView list = findViewById(R.id.filesListView);
+            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, entries);
+            list = findViewById(R.id.filesListView);
+
             list.setAdapter(adapter);
+            list.deferNotifyDataSetChanged();
             list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                     Password entry = new Password(key, getApplicationContext());
-                    entry.setName(files.get(i));
+                    entry.setName(entries.get(i));
                     try {
                         entry.load();
                     } catch (DBHelper.doesNotExistException ignored) {
@@ -267,6 +300,13 @@ public class getUsernameAndPassword extends AppCompatActivity {
                     finish();
                 }
             });
+            if (displayButton) {
+                ImageButton showAllButton = findViewById(R.id.button_show_more);
+                showAllButton.setVisibility(View.VISIBLE);
+                if (Preferences.sharedPreferences.getBoolean(Preferences.darkMode, false)) {
+                    showAllButton.setImageResource(R.drawable.ic_arrow_down_white);
+                }
+            }
         }
     }
 
@@ -355,6 +395,38 @@ public class getUsernameAndPassword extends AppCompatActivity {
         overridePendingTransition(0, 0);
         startActivity(intent);
         overridePendingTransition(0, 0);
+    }
+
+    public void changeEntries(View view){
+
+        ImageButton button = findViewById(R.id.button_show_more);
+        int down = R.drawable.ic_arrow_down_black;
+        int up = R.drawable.ic_arrow_up_black;
+        if (Preferences.sharedPreferences.getBoolean(Preferences.darkMode, false)){
+            down = R.drawable.ic_arrow_down_white;
+            up = R.drawable.ic_arrow_up_white;
+        }
+
+        if (showingAll){
+            entries = possibleEntries;
+            adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, entries);
+            list.setAdapter(adapter);
+            button.setImageResource(down);
+            for (String i : entries){
+                Log.i(TAG, i);
+            }
+        }
+        else{
+            entries = allEntries;
+            adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, entries);
+            list.setAdapter(adapter);
+            button.setImageResource(up);
+            for (String i : entries){
+                Log.i(TAG, i);
+            }
+        }
+
+        showingAll = !showingAll;
     }
 
 }

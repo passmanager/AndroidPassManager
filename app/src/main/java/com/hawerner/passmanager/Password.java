@@ -1,18 +1,15 @@
 package com.hawerner.passmanager;
 
 import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -250,5 +247,25 @@ public class Password {
 
     public void setPassword(String password){
         this.password = password;
+    }
+
+    public void addPackageName(String packageName){
+        DBHelper dbHelper = new DBHelper(context.getApplicationContext());
+        try {
+            dbHelper.addPackageName(dbHelper.getIdByName(name), packageName);
+        } catch (DBHelper.doesNotExistException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<String> getPackageNames(){
+        DBHelper dbHelper = new DBHelper(context.getApplicationContext());
+        List<String> packageNames = null;
+        try {
+            packageNames = dbHelper.getPackageNames(dbHelper.getIdByName(name));
+        } catch (DBHelper.doesNotExistException e) {
+            return new ArrayList<String>();
+        }
+        return packageNames;
     }
 }

@@ -34,6 +34,7 @@
         <activity
             android:name=".getUsernameAndPassword"
             android:exported="true"
+            android:excludeFromRecents="true"
             android:label="@string/title_activity_get_username_and_password" />
 
         <service

@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Environment;
+
 import com.google.android.material.navigation.NavigationView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -32,7 +32,6 @@ import android.widget.Toast;
 import com.mtramin.rxfingerprint.EncryptionMethod;
 import com.mtramin.rxfingerprint.RxFingerprint;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -73,6 +72,15 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             this.onCreate1();
         }
         startService(new Intent(this, MyAccessibilityService.class));
+
+        Password insta = new Password(key, getApplicationContext());
+        insta.setName("Instagram1");
+        insta.addPackageName("com.instagram.android");
+        DBHelper dbHelper = new DBHelper(getApplicationContext());
+        List<String> tmp = dbHelper.getNamesByPackageName("com.instagram.android");
+        for (String i : tmp){
+            Log.i("Name", i);
+        }
     }
 
     protected void onCreate1() {

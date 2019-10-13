@@ -294,10 +294,36 @@ public class getUsernameAndPassword extends AppCompatActivity {
                         intent.setAction("com.hawerner.passmanager.MyAccessibilityService");
                         intent.putExtra("username", username);
                         intent.putExtra("password", password);
-                        startService(intent);
+                        AlertDialog.Builder alert = new AlertDialog.Builder(getUsernameAndPassword.this);
+                        alert.setTitle("Associate " + entries.get(i) + " with this app?");
+                        alert.setMessage("Would you like this entry to be associated with this app?");
+                        alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                entry.addPackageName(getIntent().getStringExtra("URI"));
+                                dialog.dismiss();
+                                startService(intent);
+                                finish();
+                            }
+                        });
+                        alert.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                startService(intent);
+                                finish();
+                            }
+                        });
+                        if (!possibleEntries.contains(entry.getName()))
+                            alert.show();
+                        else{
+                            startService(intent);
+                            finish();
+                        }
                     }
                     setResult(Activity.RESULT_OK, output);
-                    finish();
+                    if (!isAccessibility)
+                        finish();
                 }
             });
             if (displayButton) {
@@ -316,7 +342,7 @@ public class getUsernameAndPassword extends AppCompatActivity {
 
     public void AddAccount(View view) {
         Intent intent = new Intent(getUsernameAndPassword.this, AddAccount.class);
-        intent.putExtra("URI", getIntent().getStringExtra("URI"));
+        intent.putExtra("packageName", getIntent().getStringExtra("URI"));
         intent.putExtra("key", key);
         intent.putExtra("isAccessibility", true);
         startActivityForResult(intent, 1);

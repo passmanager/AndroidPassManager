@@ -4,12 +4,18 @@ import android.content.Intent;
 
 import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 public class AddAccount extends AppCompatActivity {
@@ -17,6 +23,8 @@ public class AddAccount extends AppCompatActivity {
     Button generatePassword, addAccount;
     EditText fileName, username, password;
     String key;
+    String packageName;
+    PackageManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +38,8 @@ public class AddAccount extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_account);
 
+        pm = getApplicationContext().getPackageManager();
+
         generatePassword = (Button) findViewById(R.id.generatePassword);
         addAccount = (Button) findViewById(R.id.doneButton);
         fileName = (EditText) findViewById(R.id.fileName);
@@ -37,10 +47,32 @@ public class AddAccount extends AppCompatActivity {
         password = (EditText) findViewById(R.id.password);
         key = getIntent().getStringExtra("key");
         if (getIntent().getBooleanExtra("isAccessibility", false)){
-            fileName.setText(getIntent().getStringExtra("URI"));
+            packageName = getIntent().getStringExtra("packageName");
+            fileName.setText(getAppName(packageName));
             Log.i("Intent", "dobio sam accessibility");
         }
     }
+
+    public String getAppName(String packageName){
+        ApplicationInfo ai;
+        try {
+            ai = pm.getApplicationInfo( packageName, 0);
+        } catch (final PackageManager.NameNotFoundException e) {
+            ai = null;
+        }
+        return (String) (ai != null ? pm.getApplicationLabel(ai) : packageName);
+    }
+
+    public void getAllPackageNames(){
+        List<ApplicationInfo> list = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        List<String> allPackageNames = new ArrayList<>(list.size());
+        List<String> allAppNames = new ArrayList<>(allPackageNames.size());
+        for (ApplicationInfo applicationInfo : list) {
+            allPackageNames.add(applicationInfo.packageName);
+            //allAppNames.add(pm.getApplicationLabel(applicationInfo).toString());
+        }
+    }
+
     public void generatePass(View V){
         password.setText("Generating password");
         Random generator = new SecureRandom();
@@ -73,6 +105,7 @@ public class AddAccount extends AppCompatActivity {
         entry.setUsername(username.getText().toString());
         entry.setPassword(password.getText().toString());
         entry.save();
+        entry.addPackageName(packageName);
         if (getIntent().getBooleanExtra("isAccessibility", false)){
             Intent output = new Intent();
             output.putExtra("username", username.getText().toString());

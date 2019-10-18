@@ -1,8 +1,11 @@
 package com.hawerner.passmanager;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 
 import com.google.android.material.snackbar.Snackbar;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.pm.ApplicationInfo;
@@ -104,14 +107,29 @@ public class AddAccount extends AppCompatActivity {
         entry.setName(fileName.getText().toString());
         entry.setUsername(username.getText().toString());
         entry.setPassword(password.getText().toString());
-        entry.save();
-        entry.addPackageName(packageName);
-        if (getIntent().getBooleanExtra("isAccessibility", false)){
-            Intent output = new Intent();
-            output.putExtra("username", username.getText().toString());
-            output.putExtra("password", password.getText().toString());
-            setResult(RESULT_OK, output);
+        try {
+            entry.save();
+            if (getIntent().getBooleanExtra("isAccessibility", false)){
+                entry.addPackageName(packageName);
+                Intent output = new Intent();
+                output.putExtra("username", username.getText().toString());
+                output.putExtra("password", password.getText().toString());
+                setResult(RESULT_OK, output);
+            }
+            finish();
+        } catch (Password.NotUniqueException e) {
+            AlertDialog.Builder alert = new AlertDialog.Builder(AddAccount.this);
+            alert.setTitle("Name taken");
+            alert.setMessage("There is already password entry named " + entry.getName() + ".\nPlease change name or delete existing one");
+            alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            alert.setCancelable(true);
+
+            alert.create().show();
         }
-        finish();
     }
 }

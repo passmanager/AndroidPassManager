@@ -390,8 +390,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int i, long l) {
                     final int index = i;
                     Log.v("long clicked", "pos: " + files.get(i));
-                    AlertDialog.Builder alert = new AlertDialog.Builder(
-                            ListActivity.this);
+                    AlertDialog.Builder alert = new AlertDialog.Builder(ListActivity.this);
                     alert.setTitle("Delete " + files.get(index) + "?");
                     alert.setMessage("Are you sure to delete " + files.get(index) + "?");
                     alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
@@ -497,7 +496,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.

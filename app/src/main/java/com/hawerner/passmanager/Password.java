@@ -63,13 +63,16 @@ public class Password {
 
     public void decrypt(){
         //Toast.makeText(this,"Copied exe", Toast.LENGTH_LONG).show();
+        copyPassread();
         executeCommand("/system/bin/chmod 744 /data/data/" + context.getPackageName() + "/passread");
         username = executeCommand("/data/data/" + context.getPackageName() + "/passread " + usernameSalt + " " + usernameC + " " + key);
         password = executeCommand("/data/data/" + context.getPackageName() + "/passread " + passwordSalt + " " + passwordC + " " + key);
+        username = username.replace("\u200b", " ");
+        password = password.replace("\u200b", " ");
         //return decrypted;
     }
 
-    public void save(){
+    public void save() throws NotUniqueException {
         copyPassgen();
         copyPassgen();
         executeCommand("/system/bin/chmod 744 /data/data/" + context.getPackageName() + "/passgen");
@@ -79,8 +82,7 @@ public class Password {
         try {
             dbHelper.add(name, usernameSalt, usernameC, passwordSalt, passwordC);
         } catch (DBHelper.NotUniqueException e) {
-            e.printStackTrace();
-            return;
+            throw new Password.NotUniqueException();
         }
     }
 
@@ -100,8 +102,6 @@ public class Password {
         usernameC = lines.get(1);
         passwordC = lines.get(3);
         this.decrypt();
-        username = username.replace("\u200b", " ");
-        password = password.replace("\u200b", " ");
     }
 
     public void delete(){
@@ -267,5 +267,10 @@ public class Password {
             return new ArrayList<String>();
         }
         return packageNames;
+    }
+
+    public class NotUniqueException extends Exception {
+        public NotUniqueException() { super(); }
+        public NotUniqueException(String msg) { super(msg); }
     }
 }

@@ -254,6 +254,11 @@ public class getUsernameAndPassword extends AppCompatActivity {
                 }
             }
         }
+        else{
+            entries = allEntries;
+            displayButton = false;
+            loadList();
+        }
 
     }
 

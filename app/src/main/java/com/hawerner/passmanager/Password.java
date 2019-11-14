@@ -1,18 +1,15 @@
 package com.hawerner.passmanager;
 
 import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -66,13 +63,16 @@ public class Password {
 
     public void decrypt(){
         //Toast.makeText(this,"Copied exe", Toast.LENGTH_LONG).show();
+        copyPassread();
         executeCommand("/system/bin/chmod 744 /data/data/" + context.getPackageName() + "/passread");
         username = executeCommand("/data/data/" + context.getPackageName() + "/passread " + usernameSalt + " " + usernameC + " " + key);
         password = executeCommand("/data/data/" + context.getPackageName() + "/passread " + passwordSalt + " " + passwordC + " " + key);
+        username = username.replace("\u200b", " ");
+        password = password.replace("\u200b", " ");
         //return decrypted;
     }
 
-    public void save(){
+    public void save() throws NotUniqueException {
         copyPassgen();
         copyPassgen();
         executeCommand("/system/bin/chmod 744 /data/data/" + context.getPackageName() + "/passgen");
@@ -82,8 +82,7 @@ public class Password {
         try {
             dbHelper.add(name, usernameSalt, usernameC, passwordSalt, passwordC);
         } catch (DBHelper.NotUniqueException e) {
-            e.printStackTrace();
-            return;
+            throw new Password.NotUniqueException();
         }
     }
 
@@ -103,8 +102,6 @@ public class Password {
         usernameC = lines.get(1);
         passwordC = lines.get(3);
         this.decrypt();
-        username = username.replace("\u200b", " ");
-        password = password.replace("\u200b", " ");
     }
 
     public void delete(){
@@ -250,5 +247,30 @@ public class Password {
 
     public void setPassword(String password){
         this.password = password;
+    }
+
+    public void addPackageName(String packageName){
+        DBHelper dbHelper = new DBHelper(context.getApplicationContext());
+        try {
+            dbHelper.addPackageName(dbHelper.getIdByName(name), packageName);
+        } catch (DBHelper.doesNotExistException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<String> getPackageNames(){
+        DBHelper dbHelper = new DBHelper(context.getApplicationContext());
+        List<String> packageNames = null;
+        try {
+            packageNames = dbHelper.getPackageNames(dbHelper.getIdByName(name));
+        } catch (DBHelper.doesNotExistException e) {
+            return new ArrayList<String>();
+        }
+        return packageNames;
+    }
+
+    public class NotUniqueException extends Exception {
+        public NotUniqueException() { super(); }
+        public NotUniqueException(String msg) { super(msg); }
     }
 }

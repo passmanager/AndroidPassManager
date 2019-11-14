@@ -2,6 +2,7 @@ package com.hawerner.passmanager;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Entity;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
@@ -18,7 +19,8 @@ import java.util.List;
 public class DBHelper extends SQLiteOpenHelper {
     public static final String DB_NAME = "passwords.db";
     public static final String ENTRY_TABLE = "ENTRY";
-    public static final String URI_TABLE = "URI_TABLE";
+    public static final String URL_TABLE = "URL_TABLE";
+    public static final String PACKAGE_TABlE = "PACKAGE_TABLE";
     private static final String TAG = "DBHelper";
 
 
@@ -29,8 +31,8 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS " + ENTRY_TABLE + " ( id INTEGER primary key AUTOINCREMENT, name TEXT unique, usernameSalt TEXT, username TEXT, passwordSalt TEXT, password TEXT);");
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + URI_TABLE + " ( entryId INTEGER, androidPackageName TEXT, url TEXT);");
-
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + URL_TABLE + " ( entryId INTEGER, url TEXT);");
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + PACKAGE_TABlE + " (entryId INTEGER, packageName TEXT);");
     }
 
     @Override
@@ -63,7 +65,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public int delete (String id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(URI_TABLE, "entryId = ?", new String[] { id });
+        db.delete(URL_TABLE, "entryId = ?", new String[] { id });
+        db.delete(PACKAGE_TABlE, "entryId = ?", new String[] { id });
         return db.delete(ENTRY_TABLE,"id = ?", new String[] { id });
     }
 
@@ -119,6 +122,65 @@ public class DBHelper extends SQLiteOpenHelper {
         String id = res.getString(res.getColumnIndex("id"));
         res.close();
         return id;
+    }
+
+    public void addPackageName(String id, String packageName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("entryId", id);
+        contentValues.put("packageName", packageName);
+
+        Cursor res = db.rawQuery("SELECT * FROM " + PACKAGE_TABlE + " where entryId = ? and packageName = ?", new String[] {id, packageName});
+
+        if (res.getCount() != 0){
+            res.close();
+            return;
+        }
+        res.close();
+
+        try {
+            db.insertOrThrow(PACKAGE_TABlE, null, contentValues);
+        }
+        catch (Exception ignored){
+
+        }
+    }
+
+    public List<String> getPackageNames(String id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        List<String> packageNames = new ArrayList<>();
+
+        Cursor res = db.rawQuery("SELECT packageName from " + PACKAGE_TABlE + " where entryId = ?;", new String[]{ id });
+        res.moveToFirst();
+
+        while (res.isAfterLast() == false){
+            packageNames.add(res.getString(res.getColumnIndex("packageName")));
+            res.moveToNext();
+        }
+        res.close();
+
+        return packageNames;
+    }
+
+    public List<String> getNamesByPackageName(String packageName){
+        List<String> names = new ArrayList<>();
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor res = db.rawQuery("SELECT " + ENTRY_TABLE + ".name AS name FROM " + ENTRY_TABLE + ", " + PACKAGE_TABlE + " WHERE " + PACKAGE_TABlE + ".packageName = \"" + packageName + "\" AND " + ENTRY_TABLE + ".id = " + PACKAGE_TABlE + ".entryId;", null);
+        res.moveToFirst();
+
+        Log.i(TAG, String.valueOf(res.getCount()));
+
+        while (res.isAfterLast() == false){
+            names.add(res.getString(res.getColumnIndex("name")));
+            res.moveToNext();
+        }
+
+        res.close();
+
+        return names;
+
     }
 
     static class NotUniqueException extends Exception{

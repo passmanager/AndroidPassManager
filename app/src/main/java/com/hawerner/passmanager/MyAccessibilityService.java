@@ -241,20 +241,11 @@ public class MyAccessibilityService extends AccessibilityService {
 
         waitPackageName = currentPackageName;
 
-        final PackageManager pm = getApplicationContext().getPackageManager();
-        ApplicationInfo ai;
-        try {
-            ai = pm.getApplicationInfo( currentPackageName, 0);
-        } catch (final PackageManager.NameNotFoundException e) {
-            ai = null;
-        }
-        final String applicationName = (String) (ai != null ? pm.getApplicationLabel(ai) : currentPackageName);
-
         Intent intent = new Intent(MyAccessibilityService.this, getUsernameAndPassword.class);
         intent.setComponent(new ComponentName("com.hawerner.passmanager", "com.hawerner.passmanager.getUsernameAndPassword"));
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
         intent.putExtra("isAccessibility", true);
-        intent.putExtra("URI", applicationName);
+        intent.putExtra("URI", currentPackageName);
         startActivity(intent);
 
     }

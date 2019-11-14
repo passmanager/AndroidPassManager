@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.mtramin.rxfingerprint.EncryptionMethod;
 import com.mtramin.rxfingerprint.RxFingerprint;
+import com.r0adkll.slidr.Slidr;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -66,6 +67,7 @@ public class getUsernameAndPassword extends AppCompatActivity {
             setTheme(R.style.AppTheme);
         }
         super.onCreate(savedInstanceState);
+        Slidr.attach(this);
 
         try{
             key = getIntent().getStringExtra("key");

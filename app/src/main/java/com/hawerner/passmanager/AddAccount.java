@@ -17,7 +17,6 @@ import android.widget.*;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -108,7 +107,7 @@ public class AddAccount extends AppCompatActivity {
         entry.setUsername(username.getText().toString());
         entry.setPassword(password.getText().toString());
         try {
-            entry.save();
+            entry.create();
             if (getIntent().getBooleanExtra("isAccessibility", false)){
                 entry.addPackageName(packageName);
                 Intent output = new Intent();

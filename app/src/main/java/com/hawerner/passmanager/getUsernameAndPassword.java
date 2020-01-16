@@ -202,58 +202,23 @@ public class getUsernameAndPassword extends AppCompatActivity {
     }
 
     private void selectDataToLoadList(){
-        //TODO: Use database to load
         String wantedPackageName = getIntent().getStringExtra("URI");
         allEntries = Password.getAllNames(getApplicationContext());
         Collections.sort(allEntries, String.CASE_INSENSITIVE_ORDER);
         if (wantedPackageName != null) {
-            Password entry = new Password(key, getApplicationContext());
-            try {
-                DBHelper dbHelper = new DBHelper(getApplicationContext());
-                possibleEntries = dbHelper.getNamesByPackageName(wantedPackageName);
-                Collections.sort(possibleEntries, String.CASE_INSENSITIVE_ORDER);
-                displayButton = true;
+            DBHelper dbHelper = new DBHelper(getApplicationContext());
+            possibleEntries = dbHelper.getNamesByPackageName(wantedPackageName);
+            Collections.sort(possibleEntries, String.CASE_INSENSITIVE_ORDER);
+            displayButton = true;
 
-                if (possibleEntries.size() == 0) throw new Exception("Load all");
-
-                if (possibleEntries.size() == 1) {
-                    entry.setName(possibleEntries.get(0));
-                    entry.load();
-                    entry.decrypt();
-
-                    String username = entry.getUsername();
-                    String password = entry.getPassword();
-
-                    Log.i("T", "making intent started");
-                    Intent output = new Intent();
-                    output.putExtra("username", username);
-                    output.putExtra("password", password);
-                    Log.i("T", username);
-                    Log.i("T", "returning");
-                    boolean isAccessibility = getIntent().getBooleanExtra("isAccessibility", false);
-                    if (isAccessibility) {
-                        Intent intent = new Intent(getUsernameAndPassword.this, MyAccessibilityService.class);
-                        intent.setAction("com.hawerner.passmanager.MyAccessibilityService");
-                        intent.putExtra("username", username);
-                        intent.putExtra("password", password);
-                        startService(intent);
-                    }
-                    setResult(Activity.RESULT_OK, output);
-                    shouldContinue = false;
-                    finish();
-                    return;
-                }
+            if (possibleEntries.size() == 0) {
+                entries = allEntries;
+                displayButton = false;
+                loadList();
+            }
+            else {
                 entries = possibleEntries;
                 loadList();
-            } catch (DBHelper.doesNotExistException ignored) {
-
-            }
-            catch (Exception e){
-                if ("Load all".equals(e.getMessage())){
-                    entries = allEntries;
-                    displayButton = false;
-                    loadList();
-                }
             }
         }
         else{

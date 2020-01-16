@@ -239,7 +239,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         }
 
         if (useAsMasterKey) {
-            keyHash = getPassword(key, salt);
+            keyHash = getPassword(salt);
             writeToFile("key", keyHash);
             if (RxFingerprint.isAvailable(ListActivity.this)) {
                 disposable = RxFingerprint.encrypt(EncryptionMethod.RSA, this, keyName, key)
@@ -255,7 +255,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 disposable.dispose();
             }
         }
-        if (!getPassword(key, salt).equals(keyHash)) {
+        if (!getPassword(salt).equals(keyHash)) {
             shouldContinue = false;
             new AlertDialog.Builder(this)
                     .setTitle("Master key not correct")
@@ -293,7 +293,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private String getPassword(String password, String salt) {
+    private String getPassword(String salt) {
         String keytmp = bin2hex(getHash(key + salt));
         for (int i = 0; i < 512; ++i) {
             keytmp = bin2hex(getHash(keytmp + salt));
@@ -383,6 +383,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                     intent.putExtra("file", files.get(i));
                     intent.putExtra("key", key);
                     startActivity(intent);
+                    //overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
                 }
             });
             list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {

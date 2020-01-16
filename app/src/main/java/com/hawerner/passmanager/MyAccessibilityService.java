@@ -114,6 +114,7 @@ public class MyAccessibilityService extends AccessibilityService {
             );
             try {
                 if (accessibilityEvent.getSource().getPackageName().toString().equals(getApplicationContext().getPackageName())) {
+                    hideFloating();
                     return;
                 }
                 Log.i("Accessibility", accessibilityEvent.getSource().getPackageName().toString());

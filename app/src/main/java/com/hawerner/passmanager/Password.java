@@ -9,9 +9,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class Password {
 
@@ -46,6 +48,7 @@ public class Password {
     }
 
     public void crypt(){
+        copyPassgen();
 
         String usernameString = username.replace(" ", "\u200b");
         String passwordString = password.replace(" ", "\u200b");
@@ -72,10 +75,7 @@ public class Password {
         //return decrypted;
     }
 
-    public void save() throws NotUniqueException {
-        copyPassgen();
-        copyPassgen();
-        executeCommand("/system/bin/chmod 744 /data/data/" + context.getPackageName() + "/passgen");
+    public void create() throws NotUniqueException {
         if (usernameC == null || passwordC == null) this.crypt();
 
         DBHelper dbHelper = new DBHelper(context.getApplicationContext());
@@ -86,9 +86,16 @@ public class Password {
         }
     }
 
-    public void load() throws DBHelper.doesNotExistException {
-        copyPassread();
+    public void save() {
+        this.crypt();
+        DBHelper dbHelper = new DBHelper(context);
+        try{
+            dbHelper.update(name, usernameSalt, usernameC, passwordSalt, passwordC);
+        }
+        catch (Exception ignored){}
+    }
 
+    public void load() throws DBHelper.doesNotExistException {
         DBHelper dbHelper = new DBHelper(context.getApplicationContext());
         List<String> lines;
         try {
@@ -181,6 +188,8 @@ public class Password {
             myOutput.flush();
             myOutput.close();
             myInput.close();
+
+            executeCommand("chmod 755 /data/data/" + context.getPackageName() + "/passgen");
         }
         catch(Exception ex)
         {
@@ -205,6 +214,8 @@ public class Password {
             myOutput.flush();
             myOutput.close();
             myInput.close();
+
+            executeCommand("chmod 755 /data/data/" + context.getPackageName() + "/passread");
         }
         catch(Exception ex)
         {
@@ -267,6 +278,22 @@ public class Password {
             return new ArrayList<String>();
         }
         return packageNames;
+    }
+
+    private String randomSalt(int length){
+        StringBuilder str = new StringBuilder();
+        Random random = new SecureRandom();
+        char tempChar;
+        for (int i = 0; i < length; ++i){
+            tempChar = (char) (random.nextInt(95) + 32);
+            while (tempChar == '\'') tempChar = (char) (random.nextInt(95) + 32);
+            str.append(tempChar);
+        }
+        return str.toString();
+    }
+
+    private String randomSalt(){
+        return randomSalt(10);
     }
 
     public class NotUniqueException extends Exception {

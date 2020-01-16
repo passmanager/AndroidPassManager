@@ -183,6 +183,22 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
+    public void update(String name, String usernameSalt, String username, String passwordSalt, String password) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", name);
+        contentValues.put("usernameSalt", usernameSalt);
+        contentValues.put("username", username);
+        contentValues.put("passwordSalt", passwordSalt);
+        contentValues.put("password", password);
+        try {
+            db.update(ENTRY_TABLE,  contentValues, "name = ?", new String[]{name});
+        }
+        catch (android.database.sqlite.SQLiteConstraintException e){
+            Log.i(TAG, "Error adding to database");
+        }
+    }
+
     static class NotUniqueException extends Exception{
         public NotUniqueException() { super(); }
         public NotUniqueException(String msg) { super(msg); }

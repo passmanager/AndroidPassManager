@@ -32,6 +32,9 @@ public class Password {
 
     private Context context;
 
+    static {
+        System.loadLibrary("crypt-lib");
+    }
 
 
     public Password(String key, Context context){
@@ -48,32 +51,40 @@ public class Password {
         password = null;
     }
 
+    private String generateSalt(){
+        SecureRandom generator = new SecureRandom();
+        StringBuilder randomStringBuilder = new StringBuilder();
+        int randomLength = 10;
+        char tempChar;
+        for (int i = 0; i < randomLength; i++) {
+            tempChar = (char) (generator.nextInt(95) + 32);
+            while (tempChar == '\'') tempChar = (char) (generator.nextInt(95) + 32);
+            randomStringBuilder.append(tempChar);
+        }
+        return randomStringBuilder.toString();
+    }
+
     public void crypt(){
-        copyPassgen();
+        if (usernameSalt == null)
+            usernameSalt = generateSalt();
+        if (passwordSalt == null)
+            passwordSalt = generateSalt();
 
-        String usernameString = username.replace(" ", "\u200b");
-        String passwordString = password.replace(" ", "\u200b");
+        usernameC = this.nativecrypt(username, usernameSalt, key);
+        passwordC = this.nativecrypt(password, passwordSalt, key);
 
-        String data;
-        String cmd = "/data/data/" + context.getPackageName() + "/passgen " + usernameString + " " + passwordString + " " + key;
-        data = executeCommand(cmd);
-        String[] lines = data.split("\n");
-        usernameSalt = lines[0];
-        usernameC = lines[1];
-        passwordSalt = lines[2];
-        passwordC = lines[3];
-
+        Log.i("usernameSalt", usernameSalt);
+        Log.i("usernameC", usernameC);
     }
 
     public void decrypt(){
-        //Toast.makeText(this,"Copied exe", Toast.LENGTH_LONG).show();
-        copyPassread();
-        executeCommand("/system/bin/chmod 744 /data/data/" + context.getPackageName() + "/passread");
-        username = executeCommand("/data/data/" + context.getPackageName() + "/passread " + usernameSalt + " " + usernameC + " " + key);
-        password = executeCommand("/data/data/" + context.getPackageName() + "/passread " + passwordSalt + " " + passwordC + " " + key);
-        username = username.replace("\u200b", " ");
-        password = password.replace("\u200b", " ");
-        //return decrypted;
+        try {
+            username = this.nativedecrypt(usernameC, usernameSalt, key);
+            password = this.nativedecrypt(passwordC, passwordSalt, key);
+        }
+        catch (Exception e){
+            Log.e("native", e.toString());
+        }
     }
 
     public void create() throws NotUniqueException {
@@ -301,5 +312,9 @@ public class Password {
         public NotUniqueException() { super(); }
         public NotUniqueException(String msg) { super(msg); }
     }
+
+    public native String nativedecrypt(String data, String salt, String key);
+
+    public native String nativecrypt(String data, String salt, String key);
 
 }

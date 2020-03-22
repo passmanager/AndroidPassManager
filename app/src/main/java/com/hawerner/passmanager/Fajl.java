@@ -16,64 +16,37 @@ import java.util.List;
 
 
 public class Fajl {
-    public static void writeToFile(String fileName, String data){
-        Log.i("T", data);
-        BufferedWriter writer = null;
-        try
-        {
-            writer = new BufferedWriter(new FileWriter(fileName));
-            writer.write(data);
-
-        }
-        catch ( IOException e)
-        {
-            Log.e("writeToFile", "Writing to file failed " + fileName);
-        }
-        catch (Exception e){
-            Log.e("writeToFile", "Writing to file failed " + fileName);
-        }
-        finally
-        {
-            try
-            {
-                if ( writer != null)
-                    writer.close( );
-            }
-            catch ( IOException e)
-            {
-            }
+    public static void writeToFile(String fileName, String data, Context context){
+        try {
+            context.getApplicationContext();
+            FileOutputStream outputStream = context.getApplicationContext().openFileOutput(fileName, Context.MODE_PRIVATE);
+            outputStream.write(data.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            Log.e("T", e.toString());
         }
     }
 
-    public static String readFromFile(String fileName){
+    public static String readFromFile(String fileName, Context context){
         FileInputStream inputStream;
         StringBuilder tmp = new StringBuilder();
-
-        BufferedReader br;
         try {
-            br = new BufferedReader(new FileReader(fileName));
-        } catch (FileNotFoundException e) {
-            Log.d("not found", "", e);
-            return null;
-        }
-        try {
-            String line = br.readLine();
-            while (line != null) {
-                tmp.append(line).append("\n");
-                line = br.readLine();
+            inputStream = context.getApplicationContext().openFileInput(fileName);
+            int content;
+            Log.i("T", "otvorio input strim");
+            while ((content = inputStream.read()) != -1) {
+                tmp.append((char) content);
             }
-        }
-        catch (FileNotFoundException e){
+            Log.i("T", "Napravio tmp: " + tmp);
+            inputStream.close();
 
+            return tmp.toString();
+        } catch (FileNotFoundException e) {
         }
         catch (IOException e1){
 
         }
-        return tmp.toString();
-    }
-
-    public static void appendToFile(String fileName, String stringToAppend){
-        Fajl.writeToFile(fileName, Fajl.readFromFile(fileName) + stringToAppend);
+        return null;
     }
 
     public static Boolean fileExists(String fileName, Context context){

@@ -45,6 +45,8 @@ import java.util.Random;
 
 import io.reactivex.disposables.Disposable;
 
+import static com.hawerner.passmanager.Fajl.writeToFile;
+
 public class ListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private String key = "";
     boolean shouldContinue = false;
@@ -93,7 +95,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         Random generator = new SecureRandom();
 
         if (RxFingerprint.isAvailable(ListActivity.this) && Fajl.fileExists("keyCrypted", getApplicationContext())){
-            disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted"))
+            disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted", this))
                     .subscribe(decryptionResult -> {
                         switch (decryptionResult.getResult()) {
                             case FAILED:
@@ -185,7 +187,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 randomStringBuilder.append(tempChar);
             }
             salt = randomStringBuilder.toString();
-            writeToFile("salt", salt);
+            writeToFile("salt", salt, ListActivity.this);
         } catch (IOException e1) {
             shouldContinue = false;
         } catch (Exception e2) {
@@ -228,13 +230,13 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
         if (useAsMasterKey) {
             keyHash = getPassword(salt);
-            writeToFile("key", keyHash);
+            writeToFile("key", keyHash, this);
             if (RxFingerprint.isAvailable(ListActivity.this)) {
                 disposable = RxFingerprint.encrypt(EncryptionMethod.RSA, this, keyName, key)
                         .subscribe(encryptionResult -> {
                             switch (encryptionResult.getResult()) {
                                 default:
-                                    writeToFile("keyCrypted", encryptionResult.getEncrypted());
+                                    writeToFile("keyCrypted", encryptionResult.getEncrypted(), this);
                                     break;
                             }
                         }, throwable -> {
@@ -256,7 +258,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                         .subscribe(encryptionResult -> {
                             switch (encryptionResult.getResult()) {
                                 default:
-                                    writeToFile("keyCrypted", encryptionResult.getEncrypted());
+                                    writeToFile("keyCrypted", encryptionResult.getEncrypted(), this);
+                                    Log.i("keyCrypted is null", String.valueOf((Fajl.readFromFile("keyCrypted", this) == null)));
                                     break;
                             }
                         }, throwable -> {
@@ -318,7 +321,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
 
         if (key.equals("") && disposable != null && disposable.isDisposed()) {
-            disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted"))
+            disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted", this))
                     .subscribe(decryptionResult -> {
                         switch (decryptionResult.getResult()) {
                             case FAILED:
@@ -419,16 +422,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             disposable.dispose();
         }
         super.onPause();
-    }
-
-    private void writeToFile(String fileName, String data) {
-        try {
-            FileOutputStream outputStream = getApplicationContext().openFileOutput(fileName, getApplicationContext().MODE_PRIVATE);
-            outputStream.write(data.getBytes());
-            outputStream.close();
-        } catch (Exception e) {
-            Log.e("T", e.toString());
-        }
     }
 
     @Override

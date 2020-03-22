@@ -142,7 +142,7 @@ public class getUsernameAndPassword extends AppCompatActivity {
             shouldContinue = false;
         }
         if (RxFingerprint.isAvailable(getUsernameAndPassword.this) && Fajl.fileExists("keyCrypted", getApplicationContext())) {
-            Disposable disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted"))
+            Disposable disposable = RxFingerprint.decrypt(EncryptionMethod.RSA, this, keyName, Fajl.readFromFile("keyCrypted", this))
                     .subscribe(decryptionResult -> {
                         switch (decryptionResult.getResult()) {
                             case FAILED:

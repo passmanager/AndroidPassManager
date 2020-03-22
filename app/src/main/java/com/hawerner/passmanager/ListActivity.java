@@ -57,6 +57,11 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     String keyName = "key";
     private Disposable disposable;
 
+    static {
+        System.loadLibrary("crypt-lib");
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Preferences.init(getApplicationContext());
@@ -70,6 +75,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_login);
         this.onCreate1();
         startService(new Intent(this, MyAccessibilityService.class));
+
+        Toast.makeText(this, this.stringFromJNI(), Toast.LENGTH_LONG).show();
 
     }
 
@@ -530,4 +537,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         startActivity(intent);
         overridePendingTransition(0, 0);
     }
+
+    private native String stringFromJNI();
 }

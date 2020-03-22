@@ -33,6 +33,7 @@ public class Password {
     private Context context;
 
 
+
     public Password(String key, Context context){
         this.context = context;
         name = null;
@@ -300,4 +301,5 @@ public class Password {
         public NotUniqueException() { super(); }
         public NotUniqueException(String msg) { super(msg); }
     }
+
 }

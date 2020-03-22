@@ -66,21 +66,9 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        if (ContextCompat.checkSelfPermission(ListActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(ListActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-        } else {
-            this.onCreate1();
-        }
+        this.onCreate1();
         startService(new Intent(this, MyAccessibilityService.class));
 
-        Password insta = new Password(key, getApplicationContext());
-        insta.setName("Instagram1");
-        insta.addPackageName("com.instagram.android");
-        DBHelper dbHelper = new DBHelper(getApplicationContext());
-        List<String> tmp = dbHelper.getNamesByPackageName("com.instagram.android");
-        for (String i : tmp){
-            Log.i("Name", i);
-        }
     }
 
     protected void onCreate1() {

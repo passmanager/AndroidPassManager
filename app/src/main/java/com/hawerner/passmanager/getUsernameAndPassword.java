@@ -46,7 +46,6 @@ public class getUsernameAndPassword extends AppCompatActivity {
     private String key = "";
     boolean shouldContinue = false;
     String keyHash, salt;
-    boolean showAd;
     private EditText keyInput;
     String keyName = "key";
     boolean showingAll = false;

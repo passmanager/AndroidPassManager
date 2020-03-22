@@ -114,7 +114,7 @@ public class MyAccessibilityService extends AccessibilityService {
             );
             try {
                 if (accessibilityEvent.getSource().getPackageName().toString().equals(getApplicationContext().getPackageName())) {
-                    hideFloating();
+                    //hideFloating(); //TODO: Zasto kad se odkomentarise, baguje
                     return;
                 }
                 Log.i("Accessibility", accessibilityEvent.getSource().getPackageName().toString());

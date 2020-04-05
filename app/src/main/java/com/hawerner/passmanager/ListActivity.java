@@ -133,20 +133,20 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         keyInput = findViewById(R.id.enterkey);
         keyInput.setText("");
         FileInputStream inputStream;
-        String tmp;
+        StringBuilder tmp;
         useAsMasterKey = false;
         try {
             inputStream = getApplicationContext().openFileInput("key");
-            tmp = "";
+            tmp = new StringBuilder();
             int content;
             Log.i("T", "otvorio input strim");
             while ((content = inputStream.read()) != -1) {
-                tmp += (char) content;
+                tmp.append((char) content);
             }
             Log.i("T", "Napravio tmp: " + tmp);
             inputStream.close();
 
-            keyHash = tmp;
+            keyHash = tmp.toString();
         } catch (FileNotFoundException e) {
             shouldContinue = false;
             new AlertDialog.Builder(this)
@@ -167,16 +167,16 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         }
         try {
             inputStream = getApplicationContext().openFileInput("salt");
-            tmp = "";
+            tmp = new StringBuilder();
             int content;
             Log.i("T", "otvorio input strim");
             while ((content = inputStream.read()) != -1) {
-                tmp += (char) content;
+                tmp.append((char) content);
             }
             Log.i("T", "Napravio tmp: " + tmp);
             inputStream.close();
 
-            salt = tmp;
+            salt = tmp.toString();
         } catch (FileNotFoundException e) {
             StringBuilder randomStringBuilder = new StringBuilder();
             int randomLength = 30;
@@ -201,7 +201,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         try {
             digest = MessageDigest.getInstance("SHA-512");
         } catch (NoSuchAlgorithmException e1) {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         }
         digest.reset();
